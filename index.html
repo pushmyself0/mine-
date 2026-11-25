@@ -249,6 +249,20 @@ dialog::backdrop{background:rgba(16,16,20,.45)}
 .dailyTag{display:inline-block;margin-bottom:8px;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--blue-soft);color:var(--blue)}
 @media(max-width:560px){.formRow2{grid-template-columns:1fr}.freqStats{grid-template-columns:1fr}}
 
+/* Photo upload (article captures) */
+.photoGrid{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.photoThumb{position:relative;display:block;height:150px;max-width:100%;padding:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#f0f0ec;text-align:left}
+.photoThumb img{display:block;height:100%;width:auto;max-width:100%;object-fit:contain}
+.photoThumb span{display:block;width:180px;padding:8px;font-size:12px;line-height:1.4;color:var(--muted)}
+button.photoThumb:hover{border-color:var(--blue)}
+.photoThumb.pending{cursor:default}
+.photoRemove{position:absolute;top:4px;right:4px;width:24px;height:24px;padding:0;border:0;border-radius:50%;background:rgba(0,0,0,.68);color:#fff;font-size:15px;line-height:1}
+.photoRemove:hover{background:#b42318}
+.photoPick input[type=file]{padding:9px;background:#fff}
+#photoLightbox{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:28px;background:rgba(10,10,14,.88)}
+#photoLightbox img{max-width:100%;max-height:100%;object-fit:contain;background:#fff;border-radius:6px}
+#photoLightbox button{position:absolute;top:16px;right:16px;padding:8px 16px;font-weight:600}
+
 /* Responsive */
 @media(max-width:1120px){
   .shelf{column-count:2;column-gap:26px}
@@ -287,6 +301,7 @@ dialog::backdrop{background:rgba(16,16,20,.45)}
     </div>
   </div>
 </div>
+<div id="photoLightbox" hidden role="dialog" aria-modal="true" aria-label="기사 사진 크게 보기"><img id="photoLightboxImg" alt="기사 캡처 사진 확대"><button type="button" id="photoLightboxClose">닫기</button></div>
 <div class="shell">
 <aside class="rail">
   <div class="railTop">
@@ -354,20 +369,17 @@ dialog::backdrop{background:rgba(16,16,20,.45)}
       <h3>기사 속 표현</h3>
       <div id="dictArticles"></div>
       <details id="dictArtDetails" class="dictFormBox">
-        <summary>+ 이 용어의 기사 속 표현 기록하기</summary>
+        <summary>+ 사진 추가 (기사 속 표현 캡처)</summary>
         <form id="dictArtForm">
+          <label class="photoPick">기사에서 이 용어가 나온 부분 캡처 (여러 장 가능)<input type="file" name="photos" accept="image/*" multiple></label>
+          <div id="dictArtPreview" class="photoGrid"></div>
           <div class="formRow2">
             <label>기사 날짜<input type="date" name="date" required></label>
-            <label>출처 매체<input name="source" value="한국경제" maxlength="40" required></label>
+            <label>한 줄 메모 (선택)<input name="note" maxlength="200" placeholder="예: 금리 동결 기사"></label>
           </div>
-          <label>기사 링크 (선택)<input type="url" name="url" placeholder="https://www.hankyung.com/..."></label>
-          <label>기사 속 짧은 인용 / 표현<input name="expression" placeholder="예: 한은, 기준금리 동결 시사" maxlength="200" required></label>
-          <label>어떤 사건인지 내 요약<textarea name="event" placeholder="기사에서 어떤 맥락으로 쓰였는지 내 말로 1~2문장 적어 주세요." required></textarea></label>
-          <label>당사자별 영향 (선택 · 한 줄에 하나씩 ‘대상: 영향’ 형식)<textarea name="impacts" placeholder="예:
-대출자: 이자 부담이 당분간 유지된다
-예금자: 예금 금리가 크게 오르지 않는다"></textarea></label>
-          <button type="submit">기사 표현 저장</button>
-          <small class="formNotice">저작권 보호를 위해 기사 전문이 아닌 짧은 인용(1~2문장)과 본인 요약만 저장해 주세요.</small>
+          <button type="submit" name="save">사진 저장</button>
+          <p id="dictArtStatus" role="status" class="formNotice"></p>
+          <small class="formNotice">캡처한 화면을 폼 안에서 Ctrl+V로 붙여넣어도 됩니다. 사진은 이 브라우저에만 저장되고 사이트에 공개되지 않아요. 기사 전체가 아니라 표현이 나온 부분만 캡처해 주세요.</small>
         </form>
       </details>
       <h3>연관 용어</h3>
@@ -384,14 +396,17 @@ dialog::backdrop{background:rgba(16,16,20,.45)}
         <label>날짜<input type="date" name="date" required></label>
         <label>매체<input name="source" value="한국경제" maxlength="40" required></label>
       </div>
-      <label>기사 제목<input name="title" placeholder="예: 원·달러 환율 1,400원 돌파… 수출기업 희비" maxlength="160" required></label>
+      <label>기사 제목 (사진이 있으면 생략 가능)<input name="title" placeholder="예: 원·달러 환율 1,400원 돌파… 수출기업 희비" maxlength="160"></label>
       <label>기사 링크 (선택)<input type="url" name="url" placeholder="https://www.hankyung.com/..."></label>
+      <label class="photoPick">기사 캡처 사진 (선택 · 여러 장 가능)<input type="file" name="photos" accept="image/*" multiple></label>
+      <div id="newsPhotoPreview" class="photoGrid"></div>
       <label>관련 경제 용어 태그 (검색해서 클릭)<input type="search" id="newsTermInput" placeholder="예: 환율, 기준금리, BW" autocomplete="off"></label>
       <div id="newsTermSuggest" class="chipSuggest"></div>
       <div id="newsSelectedTerms" class="chipWrap"></div>
-      <label>내 한 줄 해석<textarea name="note" placeholder="이 기사가 왜 중요하고, 어떤 경제 흐름을 보여 주는지 내 언어로 정리해 보세요." required></textarea></label>
+      <label>내 한 줄 해석 (사진이 있으면 생략 가능)<textarea name="note" placeholder="이 기사가 왜 중요하고, 어떤 경제 흐름을 보여 주는지 내 언어로 정리해 보세요."></textarea></label>
       <button type="submit">기사 메모 저장</button>
-      <small class="formNotice">여기서 태그한 용어는 자동으로 기사 빈도에 쌓이고, 오늘 날짜로 저장한 용어는 ‘오늘의 경제용어’ 창에 우선 표시됩니다.</small>
+      <p id="newsFormStatus" role="status" class="formNotice"></p>
+      <small class="formNotice">사진은 이 브라우저에만 저장되고 사이트에 공개되지 않아요. 여기서 태그한 용어는 자동으로 기사 빈도에 쌓이고, 오늘 날짜로 저장한 용어는 ‘오늘의 경제용어’ 창에 우선 표시됩니다.</small>
     </form>
   </section>
   <section>
@@ -411,7 +426,7 @@ dialog::backdrop{background:rgba(16,16,20,.45)}
     </div>
     <div id="freqList"></div>
     <div class="backupBar">
-      <button type="button" id="exportArchiveBtn">기사 기록 백업 (JSON)</button>
+      <button type="button" id="exportArchiveBtn">기사 기록·사진 백업 (JSON)</button>
       <button type="button" id="importArchiveBtn">백업 불러오기</button>
       <input type="file" id="importArchiveFile" accept="application/json" hidden>
       <small id="backupStatus" role="status" style="align-self:center"></small>
@@ -683,10 +698,105 @@ function parseImpactsText(raw){
     return m?{who:m[1].trim(),effect:m[2].trim()}:{who:'참고',effect:line};
   });
 }
+const photoState={db:null,urls:new Map()};
+function photoDb(){
+  if(!photoState.db)photoState.db=new Promise((resolve,reject)=>{
+    if(!window.indexedDB){reject(new Error('no-idb'));return}
+    const r=indexedDB.open('dict-article-photos-v1',1);
+    r.onupgradeneeded=()=>r.result.createObjectStore('p');
+    r.onsuccess=()=>resolve(r.result);
+    r.onerror=()=>reject(r.error||new Error('idb'));
+  });
+  return photoState.db;
+}
+function photoTx(mode,fn){
+  return photoDb().then(db=>new Promise((resolve,reject)=>{
+    const tx=db.transaction('p',mode),req=fn(tx.objectStore('p'));
+    tx.oncomplete=()=>resolve(req?req.result:undefined);
+    tx.onerror=()=>reject(tx.error);
+    tx.onabort=()=>reject(tx.error);
+  }));
+}
+function photoPut(id,blob){return photoTx('readwrite',s=>s.put(blob,id))}
+function photoGet(id){return photoTx('readonly',s=>s.get(id))}
+function photoDelete(id){return photoTx('readwrite',s=>s.delete(id))}
+function photoDeleteMany(ids){return Promise.all((ids||[]).map(id=>photoDelete(id).catch(()=>{})))}
+function photoUrl(id){
+  if(photoState.urls.has(id))return Promise.resolve(photoState.urls.get(id));
+  return photoGet(id).then(blob=>{
+    if(!blob)return '';
+    const u=URL.createObjectURL(blob);photoState.urls.set(id,u);return u;
+  });
+}
+function blobToDataUrl(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(blob)})}
+function shrinkImage(file){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file),img=new Image();
+    img.onload=()=>{
+      URL.revokeObjectURL(url);
+      const max=1800,scale=Math.min(1,max/Math.max(img.width,img.height));
+      const w=Math.max(1,Math.round(img.width*scale)),h=Math.max(1,Math.round(img.height*scale));
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);
+      c.toBlob(b=>b?resolve(b):reject(new Error('compress')),'image/jpeg',0.86);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('load'))};
+    img.src=url;
+  });
+}
+async function savePickedPhotos(files){
+  const ids=[];
+  try{
+    for(const f of files){
+      const blob=await shrinkImage(f),id=makeId();
+      await photoPut(id,blob);ids.push(id);
+    }
+  }catch(err){await photoDeleteMany(ids);throw err}
+  return ids;
+}
+function openPhotoBox(url){el('photoLightboxImg').src=url;el('photoLightbox').hidden=false}
+function closePhotoBox(){el('photoLightbox').hidden=true;el('photoLightboxImg').removeAttribute('src')}
+el('photoLightbox').onclick=closePhotoBox;
+el('photoLightboxClose').onclick=closePhotoBox;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!el('photoLightbox').hidden)closePhotoBox()});
+function renderPhotoStrip(ids){
+  const wrap=node('div','');wrap.className='photoGrid';
+  for(const id of ids||[]){
+    const b=document.createElement('button');b.type='button';b.className='photoThumb';b.setAttribute('aria-label','기사 사진 크게 보기');
+    const img=document.createElement('img');img.alt='기사 캡처 사진';b.append(img);
+    const fail=()=>{b.replaceChildren(node('span','사진을 불러오지 못했어요. 다른 브라우저에서 저장한 기록이면 백업 파일을 불러와 주세요.'));b.disabled=true};
+    photoUrl(id).then(u=>{if(u){img.src=u;b.onclick=()=>openPhotoBox(u)}else fail()}).catch(fail);
+    wrap.append(b);
+  }
+  return wrap;
+}
+function makePhotoPicker(form,input,preview){
+  const picked=[];
+  function redraw(){
+    preview.replaceChildren();
+    picked.forEach(item=>{
+      const cell=node('div','');cell.className='photoThumb pending';
+      const img=document.createElement('img');img.src=item.url;img.alt='선택한 사진';
+      const x=button('×',()=>{URL.revokeObjectURL(item.url);picked.splice(picked.indexOf(item),1);redraw()});
+      x.type='button';x.className='photoRemove';x.setAttribute('aria-label','사진 빼기');
+      cell.append(img,x);preview.append(cell);
+    });
+  }
+  function add(files){
+    for(const f of files)if(f&&/^image\//.test(f.type))picked.push({file:f,url:URL.createObjectURL(f)});
+    redraw();
+  }
+  input.onchange=()=>{add([...input.files]);input.value=''};
+  form.addEventListener('paste',e=>{
+    const files=[...(e.clipboardData?e.clipboardData.files:[])].filter(f=>/^image\//.test(f.type));
+    if(files.length){e.preventDefault();add(files)}
+  });
+  return {files:()=>picked.map(x=>x.file),count:()=>picked.length,clear:()=>{picked.forEach(x=>URL.revokeObjectURL(x.url));picked.length=0;redraw()}};
+}
 function renderArticleCard(a,isUser,termId){
   const box=node('div','');box.className='artItem';
   const top=node('div','');top.className='artItemTop';
-  top.append(node('h4','‘'+a.expression+'’'));
+  top.append(node('h4',a.expression?'‘'+a.expression+'’':'기사 캡처'));
   if(isUser){
     const del=button('삭제',()=>{
       if(!confirm('이 기사 표현 기록을 삭제할까요?'))return;
@@ -694,6 +804,7 @@ function renderArticleCard(a,isUser,termId){
       map[String(termId)]=(map[String(termId)]||[]).filter(x=>x.id!==a.id);
       if(!map[String(termId)].length)delete map[String(termId)];
       writeJsonStore(USER_ART_KEY,map);
+      photoDeleteMany(a.photoIds);
       if(dictState.currentTerm)dictOpen(dictState.currentTerm);
       dictRenderResults();
     });
@@ -709,6 +820,8 @@ function renderArticleCard(a,isUser,termId){
     if(u){const link=node('a','원문 기사 보기 ↗');link.href=u;link.target='_blank';link.rel='noopener noreferrer';link.className='artLink';meta.append(link)}
     box.append(meta);
   }
+  if(Array.isArray(a.photoIds)&&a.photoIds.length)box.append(renderPhotoStrip(a.photoIds));
+  if(a.note)box.append(node('p',a.note));
   if(a.event)box.append(node('p',a.event));
   if(Array.isArray(a.impacts)&&a.impacts.length){
     const ul=document.createElement('ul');ul.className='impacts';
@@ -738,7 +851,7 @@ function dictOpen(t){
   const userArts=getUserArticles(t.id);
   const builtIn=Array.isArray(t.articles)?t.articles:[];
   if(!builtIn.length&&!userArts.length){
-    arts.append(node('p','아직 기록된 기사 표현이 없어요. 아래에서 오늘 한경 기사 속 표현을 추가해 보세요.'));
+    arts.append(node('p','아직 기록된 기사 표현이 없어요. 아래에서 오늘 한경 기사의 캡처 사진을 추가해 보세요.'));
   }
   for(const a of userArts)arts.append(renderArticleCard(a,true,t.id));
   for(const a of builtIn)arts.append(renderArticleCard(a,false,t.id));
@@ -765,29 +878,25 @@ el('dictMentionBtn').onclick=()=>{
   updateMentionUI(t);
   dictRenderResults();
 };
-el('dictArtForm').onsubmit=e=>{
+const dictArtPicker=makePhotoPicker(el('dictArtForm'),el('dictArtForm').elements.photos,el('dictArtPreview'));
+el('dictArtForm').onsubmit=async e=>{
   e.preventDefault();
   const t=dictState.currentTerm;if(!t)return;
-  const f=e.target.elements;
-  const expression=f.expression.value.trim(), eventText=f.event.value.trim();
-  if(!expression||!eventText)return;
-  const entry={
-    id:makeId(),
-    date:f.date.value||todayStamp(),
-    source:f.source.value.trim()||'한국경제',
-    url:f.url.value.trim(),
-    expression,
-    event:eventText,
-    impacts:parseImpactsText(f.impacts.value)
-  };
-  const map=getUserArticlesMap(), key=String(t.id);
-  map[key]=[entry,...(Array.isArray(map[key])?map[key]:[])];
-  writeJsonStore(USER_ART_KEY,map);
-  f.expression.value='';f.event.value='';f.impacts.value='';f.url.value='';
-  f.date.value=todayStamp();
-  el('dictArtDetails').open=false;
-  dictOpen(t);
-  dictRenderResults();
+  const f=e.target.elements,status=el('dictArtStatus');
+  if(!dictArtPicker.count()){status.textContent='기사 캡처 사진을 먼저 선택해 주세요.';return}
+  f.save.disabled=true;status.textContent='사진을 저장하는 중이에요…';
+  try{
+    const photoIds=await savePickedPhotos(dictArtPicker.files());
+    const entry={id:makeId(),date:f.date.value||todayStamp(),source:'한국경제',note:f.note.value.trim(),photoIds};
+    const map=getUserArticlesMap(),key=String(t.id);
+    map[key]=[entry,...(Array.isArray(map[key])?map[key]:[])];
+    if(!writeJsonStore(USER_ART_KEY,map)){await photoDeleteMany(photoIds);throw new Error('store')}
+    dictArtPicker.clear();f.note.value='';f.date.value=todayStamp();
+    status.textContent='';el('dictArtDetails').open=false;
+    dictOpen(t);dictRenderResults();
+  }catch{
+    status.textContent='사진을 저장하지 못했어요. 이미지 파일인지, 브라우저 저장 공간이 충분한지 확인해 주세요.';
+  }finally{f.save.disabled=false}
 };
 
 function renderNewsSelectedChips(){
@@ -815,17 +924,19 @@ el('newsTermInput').oninput=()=>{
     b.type='button';box.append(b);
   }
 };
+const newsPicker=makePhotoPicker(el('newsMemoForm'),el('newsMemoForm').elements.photos,el('newsPhotoPreview'));
 function renderNewsMemos(){
   const list=el('newsMemoList');list.replaceChildren();
   const memos=getNewsMemos().slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  el('newsMemoStatus').textContent=memos.length?'총 '+memos.length+'개의 기사 메모가 쌓였어요.':'아직 기록한 기사 메모가 없어요. 오늘 읽은 한경 기사부터 한 줄 남겨 보세요.';
+  el('newsMemoStatus').textContent=memos.length?'총 '+memos.length+'개의 기사 메모가 쌓였어요.':'아직 기록한 기사 메모가 없어요. 오늘 읽은 한경 기사 캡처부터 올려 보세요.';
   for(const m of memos){
     const card=node('div','');card.className='newsCard';
     const head=node('div','');head.className='newsCardHead';
-    head.append(node('h4',m.title));
+    head.append(node('h4',m.title||'기사 캡처 메모'));
     const del=button('삭제',()=>{
       if(!confirm('이 기사 메모를 삭제할까요?'))return;
       writeJsonStore(NEWS_MEMO_KEY,getNewsMemos().filter(v=>v.id!==m.id));
+      photoDeleteMany(m.photoIds);
       renderNewsMemos();
     });
     del.type='button';del.className='artDel';
@@ -836,6 +947,7 @@ function renderNewsMemos(){
     const u=safeUrl(m.url);
     if(u){const link=node('a','원문 기사 보기 ↗');link.href=u;link.target='_blank';link.rel='noopener noreferrer';link.className='artLink';meta.append(link)}
     card.append(meta);
+    if(Array.isArray(m.photoIds)&&m.photoIds.length)card.append(renderPhotoStrip(m.photoIds));
     if(Array.isArray(m.termIds)&&m.termIds.length){
       const chips=node('div','');chips.className='chipWrap';
       for(const id of m.termIds){
@@ -847,33 +959,42 @@ function renderNewsMemos(){
       }
       card.append(chips);
     }
-    const note=node('p',m.note);note.className='newsNote';
-    card.append(note);
+    if(m.note){const note=node('p',m.note);note.className='newsNote';card.append(note)}
     list.append(card);
   }
 }
-el('newsMemoForm').onsubmit=e=>{
+el('newsMemoForm').onsubmit=async e=>{
   e.preventDefault();
-  const f=e.target.elements;
-  const title=f.title.value.trim(), note=f.note.value.trim();
-  if(!title||!note)return;
-  const entry={
-    id:makeId(),
-    date:f.date.value||todayStamp(),
-    source:f.source.value.trim()||'한국경제',
-    title,
-    url:f.url.value.trim(),
-    termIds:dictState.newsSelected.map(t=>t.id),
-    note
-  };
-  writeJsonStore(NEWS_MEMO_KEY,[entry,...getNewsMemos()]);
-  e.target.reset();
-  f.date.value=todayStamp();
-  f.source.value='한국경제';
-  dictState.newsSelected=[];
-  renderNewsSelectedChips();
-  el('newsTermSuggest').replaceChildren();
-  renderNewsMemos();
+  const f=e.target.elements,status=el('newsFormStatus');
+  const title=f.title.value.trim(),note=f.note.value.trim();
+  if(!newsPicker.count()&&!(title&&note)){status.textContent='기사 캡처 사진을 올리거나, 제목과 한 줄 해석을 적어 주세요.';return}
+  const submitBtn=e.target.querySelector('button[type=submit]');
+  submitBtn.disabled=true;status.textContent='저장하는 중이에요…';
+  try{
+    const photoIds=newsPicker.count()?await savePickedPhotos(newsPicker.files()):[];
+    const entry={
+      id:makeId(),
+      date:f.date.value||todayStamp(),
+      source:f.source.value.trim()||'한국경제',
+      title,
+      url:f.url.value.trim(),
+      termIds:dictState.newsSelected.map(t=>t.id),
+      note,
+      photoIds
+    };
+    if(!writeJsonStore(NEWS_MEMO_KEY,[entry,...getNewsMemos()])){await photoDeleteMany(photoIds);throw new Error('store')}
+    e.target.reset();
+    f.date.value=todayStamp();
+    f.source.value='한국경제';
+    newsPicker.clear();
+    dictState.newsSelected=[];
+    renderNewsSelectedChips();
+    el('newsTermSuggest').replaceChildren();
+    status.textContent='';
+    renderNewsMemos();
+  }catch{
+    status.textContent='저장하지 못했어요. 이미지 파일인지, 브라우저 저장 공간이 충분한지 확인해 주세요.';
+  }finally{submitBtn.disabled=false}
 };
 
 function renderFreqTab(){
@@ -919,24 +1040,26 @@ function renderFreqTab(){
 }
 el('freqOnlyTodo').onchange=renderFreqTab;
 
-el('exportArchiveBtn').onclick=()=>{
-  const payload={
-    exportedAt:new Date().toISOString(),
-    userArticles:getUserArticlesMap(),
-    newsMemos:getNewsMemos(),
-    mentions:getMentionsMap()
-  };
-  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+el('exportArchiveBtn').onclick=async()=>{
+  const status=el('backupStatus');status.textContent='백업 파일을 만드는 중이에요…';
+  const arts=getUserArticlesMap(),memos=getNewsMemos(),ids=new Set();
+  Object.values(arts).forEach(arr=>{if(Array.isArray(arr))arr.forEach(a=>(a.photoIds||[]).forEach(i=>ids.add(i)))});
+  memos.forEach(m=>(m.photoIds||[]).forEach(i=>ids.add(i)));
+  const photos={};
+  for(const id of ids){try{const b=await photoGet(id);if(b)photos[id]=await blobToDataUrl(b)}catch{}}
+  const payload={exportedAt:new Date().toISOString(),userArticles:arts,newsMemos:memos,mentions:getMentionsMap(),photos};
+  const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=node('a','');a.href=url;a.download='hankyung-archive-'+todayStamp()+'.json';a.click();
   setTimeout(()=>URL.revokeObjectURL(url),4000);
-  el('backupStatus').textContent='백업 파일을 내려받았어요.';
+  status.textContent='백업 파일을 내려받았어요. (사진 '+Object.keys(photos).length+'장 포함)';
 };
 el('importArchiveBtn').onclick=()=>el('importArchiveFile').click();
-el('importArchiveFile').onchange=e=>{
+el('importArchiveFile').onchange=async e=>{
   const file=e.target.files&&e.target.files[0];if(!file)return;
-  file.text().then(txt=>{
-    const data=JSON.parse(txt);
+  const status=el('backupStatus');
+  try{
+    const data=JSON.parse(await file.text());
     if(data.userArticles&&typeof data.userArticles==='object'){
       const cur=getUserArticlesMap();
       for(const [id,arr] of Object.entries(data.userArticles)){
@@ -948,21 +1071,28 @@ el('importArchiveFile').onchange=e=>{
       writeJsonStore(USER_ART_KEY,cur);
     }
     if(Array.isArray(data.newsMemos)){
-      const cur=getNewsMemos(), seen=new Set(cur.map(x=>x.id));
+      const cur=getNewsMemos(),seen=new Set(cur.map(x=>x.id));
       writeJsonStore(NEWS_MEMO_KEY,[...cur,...data.newsMemos.filter(x=>x&&!seen.has(x.id))]);
     }
     if(data.mentions&&typeof data.mentions==='object'){
       const cur=getMentionsMap();
       for(const [id,dates] of Object.entries(data.mentions)){
         if(!Array.isArray(dates))continue;
-        const set=new Set([...(Array.isArray(cur[id])?cur[id]:[]),...dates]);
-        cur[id]=[...set];
+        cur[id]=[...new Set([...(Array.isArray(cur[id])?cur[id]:[]),...dates])];
       }
       writeJsonStore(MENTION_KEY,cur);
     }
-    el('backupStatus').textContent='백업 기록을 불러왔어요.';
+    let restored=0;
+    if(data.photos&&typeof data.photos==='object'){
+      for(const [id,url] of Object.entries(data.photos)){
+        if(typeof url!=='string'||!url.startsWith('data:image/'))continue;
+        try{const blob=await (await fetch(url)).blob();await photoPut(id,blob);restored++}catch{}
+      }
+    }
+    status.textContent='백업 기록을 불러왔어요.'+(restored?' (사진 '+restored+'장 복원)':'');
     renderFreqTab();renderNewsMemos();dictRenderResults();
-  }).catch(()=>{el('backupStatus').textContent='올바른 백업 JSON 파일이 아니에요.'});
+    if(dictState.currentTerm)dictOpen(dictState.currentTerm);
+  }catch{status.textContent='올바른 백업 JSON 파일이 아니에요.'}
   e.target.value='';
 };
 
