@@ -1,8 +1,17 @@
-<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>캠퍼스 노트 · 시간표와 과제</title>
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>나의 취향들</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f6f6f0;color:#193731;font:16px/1.55 system-ui,sans-serif;word-break:keep-all}main,header,footer{max-width:1050px;margin:auto;padding:20px 4%}header{display:flex;justify-content:space-between;border-bottom:1px solid #ced6c9}header b{font-family:Georgia,serif;font-size:22px}h1{font-size:clamp(34px,6vw,60px);letter-spacing:-.075em;margin:4px 0 16px}h2{font-size:23px;margin:0 0 18px}small,footer{color:#475e55}.week{background:#164e42;color:white;border-radius:16px;padding:22px;display:flex;gap:6px;margin:14px 0 24px}.week button{flex:1;background:transparent;color:white;border:0;padding:9px 2px}.week button[aria-pressed=true]{background:#e3f7ac;color:#163b31}.week span{display:block;font-size:22px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}section,details{background:white;padding:22px;border:1px solid #d3dbd1;border-radius:14px;margin-bottom:16px}button,summary{cursor:pointer;font:inherit}button{border:1px solid #9fb3a6;border-radius:8px;background:#fff;padding:7px 13px;color:inherit}summary{font-weight:700}label{display:block;margin:9px 0}input,select{font:inherit;max-width:100%;padding:7px;border:1px solid #9fb3a6;border-radius:6px}input:not([type=checkbox]),select{display:block;width:100%}form button,.primary{background:#164e42;color:white}.row{border-top:1px solid #d4ded4;padding:12px 0}.row p{margin:4px 0}.row button{font-size:14px;margin:3px}.over{color:#984528}a{color:#164e42}footer{font-size:14px}dialog{width:min(420px,92vw);border:0;border-radius:16px;padding:24px;color:inherit}dialog::backdrop{background:#132f2980}@media(max-width:680px){.grid{display:block}.week{padding:10px;gap:2px}section{padding:17px}header{align-items:center}}
+
+[hidden]{display:none!important}.homeLink{font-size:18px;font-weight:750;text-decoration:none}.shelf{display:grid;grid-template-columns:1fr 1fr;gap:14px}.shelf a{border-radius:12px;padding:24px;text-decoration:none;background:#dce7dc;border:1px solid #c2cdbf;color:#203c36}.shelf a:nth-child(2){background:#eddecf}.shelf a:nth-child(3){background:#e4e1ec}.shelf a:nth-child(4){background:#e8e6cd}.shelf a:focus-visible,.shelf a:hover{outline:2px solid #28564a}.shelf strong{display:block;font-size:23px}.shelf span{display:block;margin-top:8px}.hubTitle{margin-bottom:5px}.intro{margin:0 0 28px}.journal{max-width:720px;margin:auto}.journal textarea{font:inherit;width:100%;min-height:85px;border:1px solid #9fb3a6;border-radius:6px;padding:9px}.entryText{white-space:pre-wrap;overflow-wrap:anywhere}.metrics{display:flex;gap:12px}.metrics label{min-width:0;flex:1}@media(max-width:560px){.shelf{grid-template-columns:1fr}.shelf a{padding:18px}}
 </style>
-<header><b>Campus Note</b><small>나의 학기 플래너</small></header><main><small id="stamp"></small><h1>수업과 과제</h1><div id="week" class="week" aria-label="이번 주 날짜 선택"></div>
+<header><a class="homeLink" href="#home">나의 취향들</a><a id="backHome" href="#home" hidden>홈으로</a></header>
+<main id="home"><h1 class="hubTitle">나의 취향들</h1><p class="intro">요즘 무엇을 하고, 무엇을 좋아하는지 남겨보는 곳.</p><nav class="shelf">
+<a href="#study"><strong>수업과 과제</strong><span>오늘 수업과 다가오는 마감</span></a>
+<a href="#exercise"><strong>운동 측정 장치</strong><span>운동별 무게와 횟수, 세트 기록</span></a>
+<a href="#memo"><strong>메모장</strong><span>기억하고 싶은 순간과 생각</span></a>
+<a href="#money"><strong>경제 관념 다듬기</strong><span>어디에 돈을 썼고 어떤 만족이 남았는지</span></a></nav></main>
+<main id="journal" class="journal" hidden><h1 id="journalTitle"></h1><section><form id="journalForm"></form></section><h2>지난 기록</h2><div id="records"></div><p id="journalStatus" role="status"></p></main>
+<main id="study" hidden><small id="stamp"></small><h1>수업과 과제</h1><div id="week" class="week" aria-label="이번 주 날짜 선택"></div>
 <div class="grid"><section><h2 id="dayTitle"></h2><div id="classes"></div><button onclick="courseBox.showModal()">수업 등록</button></section><section><h2>과제 마감</h2><div id="tasks"></div><button class="primary" onclick="newTask()">과제 추가</button></section></div>
 <details><summary>공지 확인 알림</summary><p>매일 Canvas 공지를 확인할 시간을 정하고 캘린더 앱에 추가하세요.</p><label>매일 확인할 시간<input id="daily" type="time" value="18:00"></label><button onclick="dailyCalendar()">캘린더로 내보내기</button></details>
 <details><summary>등록한 수업 관리</summary><div id="manage"></div></details><details><summary>제출한 과제</summary><div id="doneList"></div></details>
@@ -40,4 +49,30 @@ el('parse').onclick=()=>{
 function calendar(id,title,date,lead,repeat){const utc=d=>d.toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';const safe=title.replaceAll('\\','\\\\').replaceAll(',','\\,').replaceAll(';','\\;').replace(/[\r\n]/g,' ');const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Campus Note//KO','BEGIN:VEVENT','UID:'+id+'@campus-note','DTSTAMP:'+utc(new Date()),'DTSTART:'+utc(date),'SUMMARY:'+safe];if(repeat)lines.push('RRULE:FREQ=DAILY');lines.push('BEGIN:VALARM','TRIGGER:-PT'+lead+'M','ACTION:DISPLAY','DESCRIPTION:'+safe,'END:VALARM','END:VEVENT','END:VCALENDAR');const url=URL.createObjectURL(new Blob([lines.join('\r\n')+'\r\n'],{type:'text/calendar;charset=utf-8'}));const a=node('a','');a.href=url;a.download='campus-note.ics';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);notice.textContent='다운로드한 일정을 캘린더 앱에 추가하고 알림 시간을 확인하세요.'}
 function dailyCalendar(){if(!daily.value)return;state.daily=daily.value;save();const date=new Date(),[h,m]=state.daily.split(':').map(Number);date.setHours(h,m,0,0);if(date<=new Date())date.setDate(date.getDate()+1);calendar('daily-check','Canvas 새 공지 확인',date,0,true)}
 render();
+const journalTypes={
+ exercise:{title:'운동 측정 장치',fields:[['운동 이름','text'],['무게 (kg)','number'],['횟수','number'],['세트','number']]},
+ memo:{title:'메모장',fields:[['오늘 남기고 싶은 생각','textarea']]},
+ money:{title:'경제 관념 다듬기',fields:[['무엇에 썼나요?','text'],['금액 (원)','number'],['쓰고 나서 어땠나요?','textarea']]}
+};
+function readEntries(type){return JSON.parse(localStorage.getItem('taste-log-'+type)||'[]')}
+function showEntries(type){
+ const list=el('records');list.replaceChildren();
+ for(const entry of readEntries(type)){
+ const box=node('section','');box.append(node('small',dateText(new Date(entry.at))));
+ const values=entry.values;const title=node('h3',values[0]);title.className='entryText';box.append(title);
+ if(type==='exercise')box.append(node('p',values[1]+' kg · '+values[2]+'회 × '+values[3]+'세트'));
+ if(type==='money'){const note=node('p',values[2]);note.className='entryText';box.append(node('b',Number(values[1]).toLocaleString('ko-KR')+'원'),note)}
+ list.append(box)}
+ if(!list.children.length)list.append(node('p','아직 기록이 없어요.'));
+}
+function openJournal(type){const config=journalTypes[type], form=el('journalForm');form.replaceChildren();el('journalTitle').textContent=config.title;el('journalStatus').textContent='';
+ config.fields.forEach(([caption,kind],i)=>{const label=node('label',caption),field=document.createElement(kind==='textarea'?'textarea':'input');
+ if(kind!=='textarea')field.type=kind;field.required=true;field.name='field'+i;
+ if(kind==='number'){field.min=(type==='exercise'&&i>=2)?'1':'0';field.step=(type==='exercise'&&i===1)?'any':'1'}label.append(field);form.append(label)});
+ const submit=node('button','기록 저장');form.append(submit);
+ form.onsubmit=e=>{e.preventDefault();const values=config.fields.map((_,i)=>form.elements['field'+i].value.trim());if(values.some(v=>!v))return;
+ try{const entries=readEntries(type);entries.unshift({at:new Date().toISOString(),values});localStorage.setItem('taste-log-'+type,JSON.stringify(entries));form.reset();showEntries(type);el('journalStatus').textContent='저장했어요.'}catch{el('journalStatus').textContent='기록을 저장하지 못했어요. 브라우저 저장 공간을 확인하세요.'}};
+ showEntries(type)}
+function route(){const k=location.hash.slice(1),isJournal=Object.hasOwn(journalTypes,k),isHome=k!=='study'&&!isJournal;el('home').hidden=!isHome;el('study').hidden=k!=='study';el('journal').hidden=!isJournal;el('backHome').hidden=isHome;if(isJournal)openJournal(k);window.scrollTo(0,0)}
+window.addEventListener('hashchange',route);route();
 </script></html>
