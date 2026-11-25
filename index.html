@@ -263,6 +263,16 @@ button.photoThumb:hover{border-color:var(--blue)}
 #photoLightbox img{max-width:100%;max-height:100%;object-fit:contain;background:#fff;border-radius:6px}
 #photoLightbox button{position:absolute;top:16px;right:16px;padding:8px 16px;font-weight:600}
 
+.aiSummary{background:var(--blue-soft);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;padding:12px 14px;margin:10px 0}
+.aiSummary small{display:block;color:var(--blue);font-weight:650;font-size:12px;letter-spacing:.02em}
+.aiSummary p{margin:6px 0 0;font-size:14.5px;line-height:1.7;color:#11183c;white-space:pre-wrap}
+.aiBtn{font-size:13px;padding:6px 12px;border-color:var(--blue);color:var(--blue);font-weight:600;margin:4px 0}
+.aiBtn:hover{background:var(--blue-soft)}
+.aiBusy{font-size:13px;color:var(--blue);margin:6px 0}
+.aiErr{font-size:13px;color:#b42318;margin:6px 0;line-height:1.5}
+.checkLine{display:flex;align-items:center;gap:8px;margin:12px 0;color:var(--ink);font-size:14px}
+.checkLine input{width:auto;margin:0}
+
 /* Responsive */
 @media(max-width:1120px){
   .shelf{column-count:2;column-gap:26px}
@@ -377,9 +387,10 @@ button.photoThumb:hover{border-color:var(--blue)}
             <label>기사 날짜<input type="date" name="date" required></label>
             <label>한 줄 메모 (선택)<input name="note" maxlength="200" placeholder="예: 금리 동결 기사"></label>
           </div>
+          <label class="checkLine"><input type="checkbox" name="autoSummary" checked> 저장하고 AI로 요약하기</label>
           <button type="submit" name="save">사진 저장</button>
           <p id="dictArtStatus" role="status" class="formNotice"></p>
-          <small class="formNotice">캡처한 화면을 폼 안에서 Ctrl+V로 붙여넣어도 됩니다. 사진은 이 브라우저에만 저장되고 사이트에 공개되지 않아요. 기사 전체가 아니라 표현이 나온 부분만 캡처해 주세요.</small>
+          <small class="formNotice">캡처한 화면을 폼 안에서 Ctrl+V로 붙여넣어도 됩니다. 사진은 이 브라우저에만 저장되고 사이트에 공개되지 않아요. AI 요약을 쓰면 요약을 위해 그 사진이 Google Gemini로 전송돼요. 기사 전체가 아니라 표현이 나온 부분만 캡처해 주세요.</small>
         </form>
       </details>
       <h3>연관 용어</h3>
@@ -404,9 +415,10 @@ button.photoThumb:hover{border-color:var(--blue)}
       <div id="newsTermSuggest" class="chipSuggest"></div>
       <div id="newsSelectedTerms" class="chipWrap"></div>
       <label>내 한 줄 해석 (사진이 있으면 생략 가능)<textarea name="note" placeholder="이 기사가 왜 중요하고, 어떤 경제 흐름을 보여 주는지 내 언어로 정리해 보세요."></textarea></label>
+      <label class="checkLine"><input type="checkbox" name="autoSummary" checked> 사진이 있으면 저장하고 AI로 요약하기</label>
       <button type="submit">기사 메모 저장</button>
       <p id="newsFormStatus" role="status" class="formNotice"></p>
-      <small class="formNotice">사진은 이 브라우저에만 저장되고 사이트에 공개되지 않아요. 여기서 태그한 용어는 자동으로 기사 빈도에 쌓이고, 오늘 날짜로 저장한 용어는 ‘오늘의 경제용어’ 창에 우선 표시됩니다.</small>
+      <small class="formNotice">사진은 이 브라우저에만 저장되고 사이트에 공개되지 않아요(AI 요약을 쓰면 요약을 위해 Google Gemini로 전송돼요). 여기서 태그한 용어는 자동으로 기사 빈도에 쌓이고, 오늘 날짜로 저장한 용어는 ‘오늘의 경제용어’ 창에 우선 표시됩니다.</small>
     </form>
   </section>
   <section>
@@ -793,6 +805,117 @@ function makePhotoPicker(form,input,preview){
   });
   return {files:()=>picked.map(x=>x.file),count:()=>picked.length,clear:()=>{picked.forEach(x=>URL.revokeObjectURL(x.url));picked.length=0;redraw()}};
 }
+const AI_PASS_KEY='ai-summary-pass-v1';
+const summaryUi={busy:new Set(),err:new Map()};
+function renderTermArticles(t){
+  const arts=el('dictArticles');arts.replaceChildren();
+  const userArts=getUserArticles(t.id);
+  const builtIn=Array.isArray(t.articles)?t.articles:[];
+  if(!builtIn.length&&!userArts.length){
+    arts.append(node('p','아직 기록된 기사 표현이 없어요. 아래에서 오늘 한경 기사의 캡처 사진을 추가해 보세요.'));
+  }
+  for(const a of userArts)arts.append(renderArticleCard(a,true,t.id));
+  for(const a of builtIn)arts.append(renderArticleCard(a,false,t.id));
+}
+function shrinkToBase64(blob,max,q){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(blob),img=new Image();
+    img.onload=()=>{
+      URL.revokeObjectURL(url);
+      const s=Math.min(1,max/Math.max(img.width,img.height)),w=Math.max(1,Math.round(img.width*s)),h=Math.max(1,Math.round(img.height*s));
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(img,0,0,w,h);
+      resolve(c.toDataURL('image/jpeg',q).split(',')[1]);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('load'))};
+    img.src=url;
+  });
+}
+async function requestSummary(photoIds,hint){
+  let pass=sessionStorage.getItem(AI_PASS_KEY)||'';
+  if(!pass){
+    pass=(window.prompt('AI 요약 암호를 입력해 주세요. (Vercel에 설정한 APP_PASSCODE)')||'').trim();
+    if(!pass)throw new Error('cancel');
+  }
+  let imgs=[];
+  for(const [max,q] of [[1400,.8],[1100,.7],[900,.65]]){
+    imgs=[];
+    for(const id of (photoIds||[]).slice(0,4)){const b=await photoGet(id);if(b)imgs.push(await shrinkToBase64(b,max,q))}
+    if(imgs.reduce((n,s)=>n+s.length,0)<3300000)break;
+  }
+  if(!imgs.length)throw new Error('nophoto');
+  let res;
+  try{
+    res=await fetch('/api/summarize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({passcode:pass,images:imgs,hint:hint||''})});
+  }catch{throw new Error('network')}
+  let data={};try{data=await res.json()}catch{}
+  if(res.status===401){sessionStorage.removeItem(AI_PASS_KEY);throw new Error('auth')}
+  if(res.status===404||res.status===405||res.status===501)throw new Error('noserver');
+  if(!res.ok)throw new Error('msg:'+(data.error||('오류 '+res.status)));
+  if(!data.summary)throw new Error('msg:요약 결과가 비어 있어요.');
+  sessionStorage.setItem(AI_PASS_KEY,pass);
+  return String(data.summary);
+}
+function summaryErrorText(err){
+  const m=String(err&&err.message||'');
+  if(m==='cancel')return '암호 입력을 취소했어요.';
+  if(m==='auth')return '암호가 맞지 않아요. 다시 시도하면 암호를 새로 물어봐요.';
+  if(m==='noserver')return 'AI 요약 서버가 아직 연결되지 않았어요. (배포된 사이트에서만 작동해요)';
+  if(m==='network')return '요약 서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.';
+  if(m==='nophoto')return '이 브라우저에서 사진을 찾지 못했어요. 백업 파일을 불러온 뒤 다시 시도해 주세요.';
+  if(m.startsWith('msg:'))return m.slice(4);
+  return '요약하지 못했어요. 잠시 뒤 다시 시도해 주세요.';
+}
+function hintFor(target){
+  if(target.kind==='term'){const t=dictState.byId.get(Number(target.termId));return t?t.term:''}
+  const m=getNewsMemos().find(x=>x.id===target.entryId);
+  if(!m)return '';
+  const names=(m.termIds||[]).map(id=>{const t=dictState.byId.get(Number(id));return t?t.term:''}).filter(Boolean);
+  return [m.title,...names].filter(Boolean).join(', ').slice(0,200);
+}
+function saveSummary(target,summary){
+  if(target.kind==='term'){
+    const map=getUserArticlesMap(),arr=Array.isArray(map[String(target.termId)])?map[String(target.termId)]:[];
+    const it=arr.find(x=>x.id===target.entryId);if(!it)return false;
+    it.summary=summary;it.summaryAt=todayStamp();
+    return writeJsonStore(USER_ART_KEY,map);
+  }
+  const memos=getNewsMemos(),it=memos.find(x=>x.id===target.entryId);
+  if(!it)return false;
+  it.summary=summary;it.summaryAt=todayStamp();
+  return writeJsonStore(NEWS_MEMO_KEY,memos);
+}
+function refreshAfterSummary(target){
+  if(target.kind==='term'){
+    if(dictState.currentTerm&&dictState.currentTerm.id===Number(target.termId))renderTermArticles(dictState.currentTerm);
+  }else renderNewsMemos();
+}
+async function runSummary(target,photoIds){
+  const id=target.entryId;
+  summaryUi.busy.add(id);summaryUi.err.delete(id);refreshAfterSummary(target);
+  try{
+    const s=await requestSummary(photoIds,hintFor(target));
+    if(!saveSummary(target,s))throw new Error('msg:요약을 저장하지 못했어요.');
+  }catch(err){summaryUi.err.set(id,summaryErrorText(err))}
+  finally{summaryUi.busy.delete(id);refreshAfterSummary(target)}
+}
+function renderSummaryBlock(entry,target){
+  const wrap=node('div','');
+  if(entry.summary){
+    const box=node('div','');box.className='aiSummary';
+    box.append(node('small','AI 요약 · 사진을 읽고 만든 요약이라 틀릴 수 있어요'),node('p',entry.summary));
+    wrap.append(box);
+  }
+  if(summaryUi.busy.has(entry.id)){
+    const b=node('p','AI가 사진을 읽고 요약하는 중이에요…');b.className='aiBusy';wrap.append(b);
+  }else{
+    const btn=button(entry.summary?'다시 요약':'AI로 요약하기',()=>runSummary(target,entry.photoIds));
+    btn.type='button';btn.className='aiBtn';wrap.append(btn);
+    const err=summaryUi.err.get(entry.id);
+    if(err){const e=node('p',err);e.className='aiErr';wrap.append(e)}
+  }
+  return wrap;
+}
 function renderArticleCard(a,isUser,termId){
   const box=node('div','');box.className='artItem';
   const top=node('div','');top.className='artItemTop';
@@ -820,7 +943,7 @@ function renderArticleCard(a,isUser,termId){
     if(u){const link=node('a','원문 기사 보기 ↗');link.href=u;link.target='_blank';link.rel='noopener noreferrer';link.className='artLink';meta.append(link)}
     box.append(meta);
   }
-  if(Array.isArray(a.photoIds)&&a.photoIds.length)box.append(renderPhotoStrip(a.photoIds));
+  if(Array.isArray(a.photoIds)&&a.photoIds.length){box.append(renderPhotoStrip(a.photoIds));if(isUser)box.append(renderSummaryBlock(a,{kind:'term',termId,entryId:a.id}))}
   if(a.note)box.append(node('p',a.note));
   if(a.event)box.append(node('p',a.event));
   if(Array.isArray(a.impacts)&&a.impacts.length){
@@ -847,14 +970,7 @@ function dictOpen(t){
   updateMentionUI(t);
   const plain=el('dictPlain');const show=!!t.plain;plain.hidden=!show;el('dictPlainLabel').hidden=!show;plain.textContent=t.plain||'';
   el('dictDef').textContent=t.definition;
-  const arts=el('dictArticles');arts.replaceChildren();
-  const userArts=getUserArticles(t.id);
-  const builtIn=Array.isArray(t.articles)?t.articles:[];
-  if(!builtIn.length&&!userArts.length){
-    arts.append(node('p','아직 기록된 기사 표현이 없어요. 아래에서 오늘 한경 기사의 캡처 사진을 추가해 보세요.'));
-  }
-  for(const a of userArts)arts.append(renderArticleCard(a,true,t.id));
-  for(const a of builtIn)arts.append(renderArticleCard(a,false,t.id));
+  renderTermArticles(t);
   const f=el('dictArtForm');
   if(f&&!f.elements.date.value)f.elements.date.value=todayStamp();
   const rel=el('dictRelated');rel.replaceChildren();
@@ -887,6 +1003,7 @@ el('dictArtForm').onsubmit=async e=>{
   f.save.disabled=true;status.textContent='사진을 저장하는 중이에요…';
   try{
     const photoIds=await savePickedPhotos(dictArtPicker.files());
+    const auto=f.autoSummary.checked;
     const entry={id:makeId(),date:f.date.value||todayStamp(),source:'한국경제',note:f.note.value.trim(),photoIds};
     const map=getUserArticlesMap(),key=String(t.id);
     map[key]=[entry,...(Array.isArray(map[key])?map[key]:[])];
@@ -894,6 +1011,7 @@ el('dictArtForm').onsubmit=async e=>{
     dictArtPicker.clear();f.note.value='';f.date.value=todayStamp();
     status.textContent='';el('dictArtDetails').open=false;
     dictOpen(t);dictRenderResults();
+    if(auto&&photoIds.length)runSummary({kind:'term',termId:t.id,entryId:entry.id},photoIds);
   }catch{
     status.textContent='사진을 저장하지 못했어요. 이미지 파일인지, 브라우저 저장 공간이 충분한지 확인해 주세요.';
   }finally{f.save.disabled=false}
@@ -947,7 +1065,7 @@ function renderNewsMemos(){
     const u=safeUrl(m.url);
     if(u){const link=node('a','원문 기사 보기 ↗');link.href=u;link.target='_blank';link.rel='noopener noreferrer';link.className='artLink';meta.append(link)}
     card.append(meta);
-    if(Array.isArray(m.photoIds)&&m.photoIds.length)card.append(renderPhotoStrip(m.photoIds));
+    if(Array.isArray(m.photoIds)&&m.photoIds.length){card.append(renderPhotoStrip(m.photoIds));card.append(renderSummaryBlock(m,{kind:'memo',entryId:m.id}))}
     if(Array.isArray(m.termIds)&&m.termIds.length){
       const chips=node('div','');chips.className='chipWrap';
       for(const id of m.termIds){
@@ -972,6 +1090,7 @@ el('newsMemoForm').onsubmit=async e=>{
   submitBtn.disabled=true;status.textContent='저장하는 중이에요…';
   try{
     const photoIds=newsPicker.count()?await savePickedPhotos(newsPicker.files()):[];
+    const auto=f.autoSummary.checked;
     const entry={
       id:makeId(),
       date:f.date.value||todayStamp(),
@@ -992,6 +1111,7 @@ el('newsMemoForm').onsubmit=async e=>{
     el('newsTermSuggest').replaceChildren();
     status.textContent='';
     renderNewsMemos();
+    if(auto&&photoIds.length)runSummary({kind:'memo',entryId:entry.id},photoIds);
   }catch{
     status.textContent='저장하지 못했어요. 이미지 파일인지, 브라우저 저장 공간이 충분한지 확인해 주세요.';
   }finally{submitBtn.disabled=false}
