@@ -198,6 +198,57 @@ dialog::backdrop{background:rgba(16,16,20,.45)}
 .dailyCloseBtn:hover{background:var(--blue-hover);border-color:var(--blue-hover)}
 .dailyShuffleBtn{font-size:13.5px;color:var(--muted);padding:9px 14px}
 
+/* Dictionary tabs, article expression form, news memos, frequency rank */
+.dictTabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+.dictTabs button{background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:14px;font-weight:600;color:var(--muted)}
+.dictTabs button:hover{border-color:var(--blue);color:var(--blue)}
+.dictTabs button[aria-selected=true]{background:var(--blue);border-color:var(--blue);color:#fff}
+.termHeadRow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.termHeadRow h2{margin:0}
+.termActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:650;padding:3px 9px;border-radius:999px;background:var(--blue-soft);color:var(--blue)}
+.pill.muted{background:#f0f0ec;color:var(--muted)}
+.pill.ok{background:#e8f5ee;color:#15653a}
+.mentionBtn{font-size:13px;padding:6px 12px;border-color:var(--blue);color:var(--blue);font-weight:600}
+.mentionBtn:hover{background:var(--blue-soft)}
+.dictResTop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.dictResMeta{display:flex;gap:6px;flex-wrap:wrap}
+.artItemTop{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.artMeta{font-size:12.5px;color:var(--muted);margin:0 0 6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.artLink{color:var(--blue);text-decoration:underline;text-underline-offset:2px;font-size:12.5px}
+.artDel{font-size:12px;padding:3px 8px;color:var(--muted)}
+.artDel:hover{color:#b42318;border-color:#b42318}
+.formRow2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.formNotice{display:block;margin-top:8px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.dictFormBox{margin-top:16px;background:#fafaf8;padding:16px 18px;border:1px solid var(--line);border-radius:8px}
+#dictionary textarea{width:100%;min-height:86px;display:block}
+.chipWrap{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.termChip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--blue-soft);color:var(--blue);font-size:13px;font-weight:600;border:0}
+.termChip button{border:0;background:transparent;padding:0 2px;color:var(--blue);font-weight:700;line-height:1}
+.termChip.clickable{cursor:pointer}
+.termChip.clickable:hover{background:#dce2ff}
+.chipSuggest{display:grid;gap:4px;margin-top:6px;max-height:220px;overflow-y:auto}
+.chipSuggest button{text-align:left;padding:8px 11px;font-size:13.5px;border:1px solid var(--line);background:#fff;border-radius:6px}
+.chipSuggest button:hover{border-color:var(--blue);background:var(--blue-soft)}
+.newsCard{border-top:1px solid var(--line);padding:16px 0}
+.newsCard:first-child{border-top:0;padding-top:4px}
+.newsCardHead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.newsCard h4{margin:0;font-size:16px;letter-spacing:-.01em}
+.newsNote{margin:8px 0;font-size:14.5px;line-height:1.65;color:#2b2b29;white-space:pre-wrap}
+.freqStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.statBox{background:#fafaf8;border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.statBox small{display:block;font-size:12px;color:var(--muted)}
+.statBox b{display:block;font-size:22px;font-weight:750;margin-top:2px;color:var(--ink)}
+.freqBar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.freqRow{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:8px;padding:11px 14px;margin-bottom:8px}
+.freqRow:hover{border-color:var(--blue)}
+.freqLeft{display:flex;align-items:center;gap:10px;min-width:0}
+.freqRank{font-size:13px;font-weight:750;color:var(--blue);min-width:24px}
+.freqRight{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.backupBar{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.dailyTag{display:inline-block;margin-bottom:8px;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--blue-soft);color:var(--blue)}
+@media(max-width:560px){.formRow2{grid-template-columns:1fr}.freqStats{grid-template-columns:1fr}}
+
 /* Responsive */
 @media(max-width:1120px){
   .shelf{column-count:2;column-gap:26px}
@@ -250,6 +301,7 @@ dialog::backdrop{background:rgba(16,16,20,.45)}
       <a href="#memo" data-route="memo">메모장</a>
       <a href="#money" data-route="money">경제 관념 다듬기</a>
       <a href="#dictionary" data-route="dictionary">경제 사전</a>
+      <a href="#news" data-route="news">오늘의 기사 메모</a>
       <div class="railDivider" aria-hidden="true"></div>
       <button type="button" id="openDailyBtn" class="dailyTrigger">오늘의 경제용어</button>
     </nav>
@@ -270,7 +322,103 @@ dialog::backdrop{background:rgba(16,16,20,.45)}
 <a class="magCard tall" href="#money"><div class="magMedia"><img src="images/money.jpg" alt="커튼 그림자가 진 의자 위 커피잔" loading="eager"></div><strong>경제 관념 다듬기</strong><span>어디에 돈을 썼고 어떤 만족이 남았는지 돌아보는 소비 노트.</span></a>
 <a class="magCard wide" href="#dictionary"><div class="magMedia"><img src="images/dictionary.jpg" alt="신문과 노트, 커피가 놓인 나무 테이블" loading="eager"></div><strong>경제 사전</strong><span>뜻이 헷갈리는 696개 경제·금융 용어를 쉬운 한두 문장과 원문으로 찾아보는 사전.</span></a>
 </nav></main>
-<main id="dictionary" hidden><h1>경제 사전</h1><p class="intro">정식 명칭이나 약어(예: BW, CB, PDI)로 찾아보세요. 기사에서 본 표현도 함께 볼 수 있어요.</p><section><label>용어 검색<input type="search" id="dictFind" placeholder="예: 신주인수권, BW, 환율조작국" autocomplete="off"></label><p id="dictCount" role="status"></p><div id="dictResults"></div><button id="dictMore" type="button" hidden>더 보기</button></section><article id="dictView" hidden><section><small id="dictAlts"></small><h2 id="dictTerm"></h2><h3 id="dictPlainLabel" hidden>쉽게 말하면</h3><p id="dictPlain" class="plain" hidden></p><h3>책의 정의</h3><p id="dictDef" class="entryText bookDef"></p><h3>기사 속 표현</h3><div id="dictArticles"></div><h3>연관 용어</h3><div id="dictRelated" class="relWrap"></div><small id="dictSource"></small></section></article></main><main id="fitness" class="journal" hidden><h1>운동 기록</h1><section><h2>오늘은 어떤 운동?</h2><label>운동한 날짜<input type="date" id="sportDate" required></label><div class="sports" id="sportMenu" aria-label="운동 선택"></div><div id="weights" hidden><h2>웨이트 운동 도감</h2><nav id="bodyGroups" aria-label="부위별 운동"></nav><label>종목 검색<input type="search" id="liftFind" placeholder="시티드 로우, 벤치프레스, squat"></label><p id="liftCount"></p><div id="liftGrid"></div><button id="moreLifts" type="button">더 보기</button><article id="liftView" hidden><h3 id="liftName"></h3><div id="poseList"></div></article><small>원자료의 주동근 기준 · 근력·파워리프팅·역도·스트롱맨 종목과 변형 포함<br>동작 사진 및 영문명 · <a href="https://github.com/yuhonas/free-exercise-db">Free Exercise DB</a></small></div><button class="primary" id="sportSave">운동 기록하기</button><p role="status" id="sportStatus"></p><details><summary>내 운동 메뉴 추가</summary><form id="sportAdd" class="addsport"><label>운동 이름<input name="sport" required maxlength="60"></label><button>추가</button></form></details></section><section><h2>운동별 누적 일수</h2><div id="sportChart"></div></section><section><h2>지난 운동</h2><div id="sportHistory"></div></section></main>
+<main id="dictionary" hidden>
+<h1>경제 사전</h1>
+<p class="intro">정식 명칭이나 약어(예: BW, CB, PDI)로 찾고, 매일 읽은 한경 기사의 표현과 메모를 용어와 연결해 보세요.</p>
+<div class="dictTabs" role="tablist" aria-label="경제 사전 보기 전환">
+  <button type="button" role="tab" id="tabBtnSearch" aria-selected="true">용어 검색</button>
+  <button type="button" role="tab" id="tabBtnNews" aria-selected="false">오늘의 기사 메모</button>
+  <button type="button" role="tab" id="tabBtnFreq" aria-selected="false">기사 빈도 TOP</button>
+</div>
+<div id="dictTabSearch">
+  <section>
+    <label>용어 검색<input type="search" id="dictFind" placeholder="예: 신주인수권, BW, 환율조작국" autocomplete="off"></label>
+    <p id="dictCount" role="status"></p>
+    <div id="dictResults"></div>
+    <button id="dictMore" type="button" hidden>더 보기</button>
+  </section>
+  <article id="dictView" hidden>
+    <section>
+      <small id="dictAlts"></small>
+      <div class="termHeadRow">
+        <h2 id="dictTerm"></h2>
+        <div class="termActions">
+          <span id="dictMentionBadge" class="pill muted" hidden></span>
+          <button type="button" id="dictMentionBtn" class="mentionBtn">+ 오늘 기사에 나옴</button>
+        </div>
+      </div>
+      <h3 id="dictPlainLabel" hidden>쉽게 말하면</h3>
+      <p id="dictPlain" class="plain" hidden></p>
+      <h3>책의 정의</h3>
+      <p id="dictDef" class="entryText bookDef"></p>
+      <h3>기사 속 표현</h3>
+      <div id="dictArticles"></div>
+      <details id="dictArtDetails" class="dictFormBox">
+        <summary>+ 이 용어의 기사 속 표현 기록하기</summary>
+        <form id="dictArtForm">
+          <div class="formRow2">
+            <label>기사 날짜<input type="date" name="date" required></label>
+            <label>출처 매체<input name="source" value="한국경제" maxlength="40" required></label>
+          </div>
+          <label>기사 링크 (선택)<input type="url" name="url" placeholder="https://www.hankyung.com/..."></label>
+          <label>기사 속 짧은 인용 / 표현<input name="expression" placeholder="예: 한은, 기준금리 동결 시사" maxlength="200" required></label>
+          <label>어떤 사건인지 내 요약<textarea name="event" placeholder="기사에서 어떤 맥락으로 쓰였는지 내 말로 1~2문장 적어 주세요." required></textarea></label>
+          <label>당사자별 영향 (선택 · 한 줄에 하나씩 ‘대상: 영향’ 형식)<textarea name="impacts" placeholder="예:
+대출자: 이자 부담이 당분간 유지된다
+예금자: 예금 금리가 크게 오르지 않는다"></textarea></label>
+          <button type="submit">기사 표현 저장</button>
+          <small class="formNotice">저작권 보호를 위해 기사 전문이 아닌 짧은 인용(1~2문장)과 본인 요약만 저장해 주세요.</small>
+        </form>
+      </details>
+      <h3>연관 용어</h3>
+      <div id="dictRelated" class="relWrap"></div>
+      <small id="dictSource"></small>
+    </section>
+  </article>
+</div>
+<div id="dictTabNews" hidden>
+  <section>
+    <h2>오늘의 기사 메모 작성</h2>
+    <form id="newsMemoForm">
+      <div class="formRow2">
+        <label>날짜<input type="date" name="date" required></label>
+        <label>매체<input name="source" value="한국경제" maxlength="40" required></label>
+      </div>
+      <label>기사 제목<input name="title" placeholder="예: 원·달러 환율 1,400원 돌파… 수출기업 희비" maxlength="160" required></label>
+      <label>기사 링크 (선택)<input type="url" name="url" placeholder="https://www.hankyung.com/..."></label>
+      <label>관련 경제 용어 태그 (검색해서 클릭)<input type="search" id="newsTermInput" placeholder="예: 환율, 기준금리, BW" autocomplete="off"></label>
+      <div id="newsTermSuggest" class="chipSuggest"></div>
+      <div id="newsSelectedTerms" class="chipWrap"></div>
+      <label>내 한 줄 해석<textarea name="note" placeholder="이 기사가 왜 중요하고, 어떤 경제 흐름을 보여 주는지 내 언어로 정리해 보세요." required></textarea></label>
+      <button type="submit">기사 메모 저장</button>
+      <small class="formNotice">여기서 태그한 용어는 자동으로 기사 빈도에 쌓이고, 오늘 날짜로 저장한 용어는 ‘오늘의 경제용어’ 창에 우선 표시됩니다.</small>
+    </form>
+  </section>
+  <section>
+    <h2>쌓인 기사 메모</h2>
+    <p id="newsMemoStatus" role="status"></p>
+    <div id="newsMemoList"></div>
+  </section>
+</div>
+<div id="dictTabFreq" hidden>
+  <section>
+    <h2>기사 빈도 TOP 용어</h2>
+    <p class="intro" style="margin-bottom:16px">기사 속 표현, 오늘의 기사 메모, ‘오늘 기사에 나옴’ 기록을 합산해 자주 나오는 용어를 보여 줍니다. 상위 30~50개부터 기사 속 표현을 채워 보세요.</p>
+    <div id="freqStats" class="freqStats"></div>
+    <div class="freqBar">
+      <small id="freqHint"></small>
+      <label style="margin:0;display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink)"><input type="checkbox" id="freqOnlyTodo"> 표현 미작성 용어만 보기</label>
+    </div>
+    <div id="freqList"></div>
+    <div class="backupBar">
+      <button type="button" id="exportArchiveBtn">기사 기록 백업 (JSON)</button>
+      <button type="button" id="importArchiveBtn">백업 불러오기</button>
+      <input type="file" id="importArchiveFile" accept="application/json" hidden>
+      <small id="backupStatus" role="status" style="align-self:center"></small>
+    </div>
+  </section>
+</div>
+</main><main id="fitness" class="journal" hidden><h1>운동 기록</h1><section><h2>오늘은 어떤 운동?</h2><label>운동한 날짜<input type="date" id="sportDate" required></label><div class="sports" id="sportMenu" aria-label="운동 선택"></div><div id="weights" hidden><h2>웨이트 운동 도감</h2><nav id="bodyGroups" aria-label="부위별 운동"></nav><label>종목 검색<input type="search" id="liftFind" placeholder="시티드 로우, 벤치프레스, squat"></label><p id="liftCount"></p><div id="liftGrid"></div><button id="moreLifts" type="button">더 보기</button><article id="liftView" hidden><h3 id="liftName"></h3><div id="poseList"></div></article><small>원자료의 주동근 기준 · 근력·파워리프팅·역도·스트롱맨 종목과 변형 포함<br>동작 사진 및 영문명 · <a href="https://github.com/yuhonas/free-exercise-db">Free Exercise DB</a></small></div><button class="primary" id="sportSave">운동 기록하기</button><p role="status" id="sportStatus"></p><details><summary>내 운동 메뉴 추가</summary><form id="sportAdd" class="addsport"><label>운동 이름<input name="sport" required maxlength="60"></label><button>추가</button></form></details></section><section><h2>운동별 누적 일수</h2><div id="sportChart"></div></section><section><h2>지난 운동</h2><div id="sportHistory"></div></section></main>
 <main id="journal" class="journal" hidden><h1 id="journalTitle"></h1><section><form id="journalForm"></form></section><h2>지난 기록</h2><div id="records"></div><p id="journalStatus" role="status"></p></main>
 <main id="study" hidden><small id="stamp"></small><h1>수업과 과제</h1><div id="week" class="week" aria-label="이번 주 날짜 선택"></div>
 <div class="grid"><section><h2 id="dayTitle"></h2><div id="classes"></div><button onclick="courseBox.showModal()">수업 등록</button></section><section><h2>과제 마감</h2><div id="tasks"></div><button class="primary" onclick="newTask()">과제 추가</button></section></div>
@@ -383,86 +531,477 @@ function checkRoutines(){const now=new Date(),day=localDate(now),time=String(now
 el('seeRoutines').onclick=()=>{location.hash='study';el('routineBanner').hidden=true;setTimeout(()=>el('routinePanel').scrollIntoView(),0)};
 setInterval(()=>{if(!document.hidden){checkRoutines();if(!el('study').hidden)renderRoutines()}},30000);checkRoutines();
 
-function route(){const k=location.hash.slice(1),isJournal=Object.hasOwn(journalTypes,k),isDict=k==='dictionary',isHome=k!=='study'&&k!=='exercise'&&!isJournal&&!isDict;el('fitness').hidden=k!=='exercise';if(k==='exercise')renderSports();if(k==='study')renderRoutines();el('home').hidden=!isHome;el('study').hidden=k!=='study';el('journal').hidden=!isJournal;el('subTopBar').hidden=isHome;el('backHome').hidden=isHome;el('dictionary').hidden=!isDict;const active=isHome?'home':k;document.querySelectorAll('.railNav a[data-route]').forEach(a=>{if(a.dataset.route===active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});if(isDict)dictStart();if(isJournal)openJournal(k);window.scrollTo(0,0)}
-const dictState={terms:null,source:'',loading:null,limit:20,byKey:new Map()};
-function dictNorm(s){return String(s||'').toLowerCase().replace(/[\s\-·∙・.,()\/]/g,'')}
-function dictLoad(){
- if(!dictState.loading)dictState.loading=fetch('dictionary.json').then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.json()}).then(j=>{
-  for(const t of j.terms){
-   t.keys=[t.term,...t.names,...t.alts,...t.abbrs].map(dictNorm).filter(Boolean);
-   t.defKey=dictNorm(t.definition);
-   for(const k of t.keys)if(!dictState.byKey.has(k))dictState.byKey.set(k,t);
-  }
-  dictState.terms=j.terms;dictState.source=j.source;return j.terms
- }).catch(err=>{dictState.loading=null;throw err});
- return dictState.loading
-}
-function dictSearch(q){
- const nq=dictNorm(q);if(!nq)return [];
- const scored=[];
- for(const t of dictState.terms){
-  let s=0;
-  for(const k of t.keys){if(k===nq){s=100;break}if(k.startsWith(nq))s=Math.max(s,70);else if(k.includes(nq))s=Math.max(s,50)}
-  if(!s&&nq.length>=2&&t.defKey.includes(nq))s=20;
-  if(s)scored.push([s,t]);
- }
- scored.sort((a,b)=>b[0]-a[0]||a[1].term.length-b[1].term.length);
- return scored.map(x=>x[1]);
-}
-function dictRenderResults(){
- const list=el('dictResults');list.replaceChildren();
- if(!dictState.terms)return;
- const q=el('dictFind').value;
- if(!dictNorm(q)){el('dictCount').textContent='총 '+dictState.terms.length+'개 용어. 검색어를 입력하세요.';el('dictMore').hidden=true;return}
- const hits=dictSearch(q);
- el('dictCount').textContent=hits.length?hits.length+'개 찾았어요.':'찾는 용어가 없어요. 약어나 다른 표기로 다시 찾아보세요.';
- for(const t of hits.slice(0,dictState.limit)){
-  const b=document.createElement('button');b.className='dictRes';
-  const preview=t.plain||t.definition;b.append(node('b',t.term),node('small',preview.length>70?preview.slice(0,70)+'…':preview));
-  b.onclick=()=>dictOpen(t);list.append(b);
- }
- el('dictMore').hidden=hits.length<=dictState.limit;
-}
-function dictOpen(t){
- el('dictTerm').textContent=t.term;
- el('dictAlts').textContent=t.alts.join(' · ');
- const plain=el('dictPlain');const show=!!t.plain;plain.hidden=!show;el('dictPlainLabel').hidden=!show;plain.textContent=t.plain||'';
- el('dictDef').textContent=t.definition;
- const arts=el('dictArticles');arts.replaceChildren();
- if(!t.articles.length)arts.append(node('p','기사 표현 예시는 아직 준비 중이에요.'));
- for(const a of t.articles){
-  const box=node('div','');box.className='artItem';
-  box.append(node('h4','‘'+a.expression+'’'),node('p',a.event));
-  if(a.impacts.length){const ul=document.createElement('ul');ul.className='impacts';for(const i of a.impacts){const li=document.createElement('li');li.textContent=i.who+' · '+i.effect;ul.append(li)}box.append(ul)}
-  arts.append(box);
- }
- const rel=el('dictRelated');rel.replaceChildren();
- if(!t.related.length)rel.append(node('span','연관 용어가 없어요.'));
- for(const r of t.related){const hit=dictState.byKey.get(dictNorm(r));rel.append(hit?button(r,()=>dictOpen(hit)):node('span',r))}
- el('dictSource').textContent='출처: '+dictState.source+' · 원문 '+t.page+'쪽';
- el('dictView').hidden=false;
- el('dictView').scrollIntoView({block:'start'});
-}
-function dictStart(){
- if(!dictState.terms){el('dictCount').textContent='용어를 불러오는 중이에요…';
-  dictLoad().then(()=>dictRenderResults()).catch(()=>{el('dictCount').textContent='사전 데이터를 불러오지 못했어요. 배포된 사이트 주소에서 열어 주세요.'});
-  return}
- dictRenderResults();
-}
-el('dictFind').oninput=()=>{dictState.limit=20;dictRenderResults()};
-el('dictMore').onclick=()=>{dictState.limit+=20;dictRenderResults()};
-const dailyClosedKey='daily-econ-closed-v1', dailyPickKey='daily-econ-picks-v1';
+const USER_ART_KEY='dict-user-articles-v1', NEWS_MEMO_KEY='dict-news-memos-v1', MENTION_KEY='dict-term-mentions-v1';
+function makeId(){return (typeof crypto!=='undefined'&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2,8)}
+function readJsonStore(k,fallback){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v!==null?v:fallback}catch{return fallback}}
+function writeJsonStore(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch{return false}}
+function safeUrl(u){const s=String(u||'').trim();if(!s)return '';return /^https?:\/\//i.test(s)?s:''}
 function todayStamp(){return localDate(new Date())}
 function formatDotDate(d){return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0')}
 if(el('railToday'))el('railToday').textContent='Date. '+formatDotDate(new Date());
+
+function getUserArticlesMap(){return readJsonStore(USER_ART_KEY,{})}
+function getUserArticles(termId){const m=getUserArticlesMap();return Array.isArray(m[String(termId)])?m[String(termId)]:[]}
+function getNewsMemos(){const v=readJsonStore(NEWS_MEMO_KEY,[]);return Array.isArray(v)?v:[]}
+function getMentionsMap(){return readJsonStore(MENTION_KEY,{})}
+
+function getTermStatsMap(){
+  const stats=new Map();
+  const ensure=id=>{const k=Number(id);if(!stats.has(k))stats.set(k,{total:0,articles:0,memos:0,mentions:0,today:false});return stats.get(k)};
+  const today=todayStamp();
+  const uArts=getUserArticlesMap();
+  for(const [id,arr] of Object.entries(uArts)){
+    if(!Array.isArray(arr))continue;
+    const s=ensure(id);
+    s.articles+=arr.length;s.total+=arr.length;
+    if(arr.some(a=>a.date===today))s.today=true;
+  }
+  for(const m of getNewsMemos()){
+    if(!Array.isArray(m.termIds))continue;
+    for(const id of m.termIds){
+      const s=ensure(id);
+      s.memos+=1;s.total+=1;
+      if(m.date===today)s.today=true;
+    }
+  }
+  const ments=getMentionsMap();
+  for(const [id,dates] of Object.entries(ments)){
+    if(!Array.isArray(dates))continue;
+    const s=ensure(id);
+    s.mentions+=dates.length;s.total+=dates.length;
+    if(dates.includes(today))s.today=true;
+  }
+  return stats;
+}
+function getTodayArticleTermIds(){
+  const stats=getTermStatsMap(), ids=[];
+  for(const [id,s] of stats.entries())if(s.today)ids.push(id);
+  return ids;
+}
+
+const dictState={terms:null,source:'',loading:null,limit:20,byKey:new Map(),byId:new Map(),currentTerm:null,tab:'search',newsSelected:[]};
+function setDictTab(tab){
+  dictState.tab=tab;
+  el('dictTabSearch').hidden=tab!=='search';
+  el('dictTabNews').hidden=tab!=='news';
+  el('dictTabFreq').hidden=tab!=='freq';
+  el('tabBtnSearch').setAttribute('aria-selected',tab==='search');
+  el('tabBtnNews').setAttribute('aria-selected',tab==='news');
+  el('tabBtnFreq').setAttribute('aria-selected',tab==='freq');
+  if(tab==='news'){
+    const f=el('newsMemoForm');
+    if(f&&!f.elements.date.value)f.elements.date.value=todayStamp();
+    renderNewsMemos();
+  }
+  if(tab==='freq')renderFreqTab();
+}
+el('tabBtnSearch').onclick=()=>setDictTab('search');
+el('tabBtnNews').onclick=()=>setDictTab('news');
+el('tabBtnFreq').onclick=()=>setDictTab('freq');
+
+function route(){
+  const k=location.hash.slice(1),
+    isJournal=Object.hasOwn(journalTypes,k),
+    isDict=k==='dictionary'||k==='news',
+    isHome=k!=='study'&&k!=='exercise'&&!isJournal&&!isDict;
+  el('fitness').hidden=k!=='exercise';
+  if(k==='exercise')renderSports();
+  if(k==='study')renderRoutines();
+  el('home').hidden=!isHome;
+  el('study').hidden=k!=='study';
+  el('journal').hidden=!isJournal;
+  el('subTopBar').hidden=isHome;
+  el('backHome').hidden=isHome;
+  el('dictionary').hidden=!isDict;
+  const active=isHome?'home':k;
+  document.querySelectorAll('.railNav a[data-route]').forEach(a=>{
+    if(a.dataset.route===active)a.setAttribute('aria-current','page');
+    else a.removeAttribute('aria-current');
+  });
+  if(isDict){
+    setDictTab(k==='news'?'news':'search');
+    dictStart();
+  }
+  if(isJournal)openJournal(k);
+  window.scrollTo(0,0);
+}
+
+function dictNorm(s){return String(s||'').toLowerCase().replace(/[\s\-·∙・.,()\/]/g,'')}
+function dictLoad(){
+  if(!dictState.loading)dictState.loading=fetch('dictionary.json').then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.json()}).then(j=>{
+    for(const t of j.terms){
+      t.keys=[t.term,...t.names,...t.alts,...t.abbrs].map(dictNorm).filter(Boolean);
+      t.defKey=dictNorm(t.definition);
+      for(const k of t.keys)if(!dictState.byKey.has(k))dictState.byKey.set(k,t);
+      dictState.byId.set(t.id,t);
+    }
+    dictState.terms=j.terms;dictState.source=j.source;return j.terms;
+  }).catch(err=>{dictState.loading=null;throw err});
+  return dictState.loading;
+}
+function dictSearch(q){
+  const nq=dictNorm(q);if(!nq)return [];
+  const scored=[];
+  for(const t of dictState.terms){
+    let s=0;
+    for(const k of t.keys){if(k===nq){s=100;break}if(k.startsWith(nq))s=Math.max(s,70);else if(k.includes(nq))s=Math.max(s,50)}
+    if(!s&&nq.length>=2&&t.defKey.includes(nq))s=20;
+    if(s)scored.push([s,t]);
+  }
+  scored.sort((a,b)=>b[0]-a[0]||a[1].term.length-b[1].term.length);
+  return scored.map(x=>x[1]);
+}
+function dictRenderResults(){
+  const list=el('dictResults');list.replaceChildren();
+  if(!dictState.terms)return;
+  const q=el('dictFind').value;
+  if(!dictNorm(q)){el('dictCount').textContent='총 '+dictState.terms.length+'개 용어. 검색어를 입력하세요.';el('dictMore').hidden=true;return}
+  const hits=dictSearch(q);
+  const stats=getTermStatsMap();
+  el('dictCount').textContent=hits.length?hits.length+'개 찾았어요.':'찾는 용어가 없어요. 약어나 다른 표기로 다시 찾아보세요.';
+  for(const t of hits.slice(0,dictState.limit)){
+    const b=document.createElement('button');b.className='dictRes';
+    const top=node('div','');top.className='dictResTop';
+    top.append(node('b',t.term));
+    const st=stats.get(t.id);
+    const totalArts=(t.articles?t.articles.length:0)+(st?st.articles:0);
+    if((st&&st.total)||totalArts){
+      const meta=node('span','');meta.className='dictResMeta';
+      if(st&&st.total){const p=node('span','기사 '+st.total+'회');p.className='pill';meta.append(p)}
+      if(totalArts){const p=node('span','표현 '+totalArts);p.className='pill ok';meta.append(p)}
+      top.append(meta);
+    }
+    const preview=t.plain||t.definition;
+    b.append(top,node('small',preview.length>70?preview.slice(0,70)+'…':preview));
+    b.onclick=()=>dictOpen(t);list.append(b);
+  }
+  el('dictMore').hidden=hits.length<=dictState.limit;
+}
+function parseImpactsText(raw){
+  return String(raw||'').split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(line=>{
+    const m=line.match(/^([^:·]+?)\s*[:·]\s*(.+)$/);
+    return m?{who:m[1].trim(),effect:m[2].trim()}:{who:'참고',effect:line};
+  });
+}
+function renderArticleCard(a,isUser,termId){
+  const box=node('div','');box.className='artItem';
+  const top=node('div','');top.className='artItemTop';
+  top.append(node('h4','‘'+a.expression+'’'));
+  if(isUser){
+    const del=button('삭제',()=>{
+      if(!confirm('이 기사 표현 기록을 삭제할까요?'))return;
+      const map=getUserArticlesMap();
+      map[String(termId)]=(map[String(termId)]||[]).filter(x=>x.id!==a.id);
+      if(!map[String(termId)].length)delete map[String(termId)];
+      writeJsonStore(USER_ART_KEY,map);
+      if(dictState.currentTerm)dictOpen(dictState.currentTerm);
+      dictRenderResults();
+    });
+    del.type='button';del.className='artDel';
+    top.append(del);
+  }
+  box.append(top);
+  if(a.date||a.source||a.url){
+    const meta=node('div','');meta.className='artMeta';
+    const label=[a.date,a.source].filter(Boolean).join(' · ');
+    if(label)meta.append(node('span',label));
+    const u=safeUrl(a.url);
+    if(u){const link=node('a','원문 기사 보기 ↗');link.href=u;link.target='_blank';link.rel='noopener noreferrer';link.className='artLink';meta.append(link)}
+    box.append(meta);
+  }
+  if(a.event)box.append(node('p',a.event));
+  if(Array.isArray(a.impacts)&&a.impacts.length){
+    const ul=document.createElement('ul');ul.className='impacts';
+    for(const i of a.impacts){const li=document.createElement('li');li.textContent=i.who+' · '+i.effect;ul.append(li)}
+    box.append(ul);
+  }
+  return box;
+}
+function updateMentionUI(t){
+  const st=getTermStatsMap().get(t.id);
+  const badge=el('dictMentionBadge');
+  if(st&&st.total){badge.textContent='기사 등장 '+st.total+'회';badge.hidden=false;badge.className='pill'}
+  else{badge.hidden=true}
+  const ments=getMentionsMap()[String(t.id)]||[];
+  const doneToday=ments.includes(todayStamp());
+  el('dictMentionBtn').textContent=doneToday?'✓ 오늘 기사 기록됨':'+ 오늘 기사에 나옴';
+}
+function dictOpen(t){
+  dictState.currentTerm=t;
+  setDictTab('search');
+  el('dictTerm').textContent=t.term;
+  el('dictAlts').textContent=t.alts.join(' · ');
+  updateMentionUI(t);
+  const plain=el('dictPlain');const show=!!t.plain;plain.hidden=!show;el('dictPlainLabel').hidden=!show;plain.textContent=t.plain||'';
+  el('dictDef').textContent=t.definition;
+  const arts=el('dictArticles');arts.replaceChildren();
+  const userArts=getUserArticles(t.id);
+  const builtIn=Array.isArray(t.articles)?t.articles:[];
+  if(!builtIn.length&&!userArts.length){
+    arts.append(node('p','아직 기록된 기사 표현이 없어요. 아래에서 오늘 한경 기사 속 표현을 추가해 보세요.'));
+  }
+  for(const a of userArts)arts.append(renderArticleCard(a,true,t.id));
+  for(const a of builtIn)arts.append(renderArticleCard(a,false,t.id));
+  const f=el('dictArtForm');
+  if(f&&!f.elements.date.value)f.elements.date.value=todayStamp();
+  const rel=el('dictRelated');rel.replaceChildren();
+  if(!t.related.length)rel.append(node('span','연관 용어가 없어요.'));
+  for(const r of t.related){const hit=dictState.byKey.get(dictNorm(r));rel.append(hit?button(r,()=>dictOpen(hit)):node('span',r))}
+  el('dictSource').textContent='출처: '+dictState.source+' · 원문 '+t.page+'쪽';
+  el('dictView').hidden=false;
+  el('dictView').scrollIntoView({block:'start'});
+}
+el('dictMentionBtn').onclick=()=>{
+  const t=dictState.currentTerm;if(!t)return;
+  const today=todayStamp(), map=getMentionsMap(), key=String(t.id);
+  const arr=Array.isArray(map[key])?[...map[key]]:[];
+  if(arr.includes(today)){
+    map[key]=arr.filter(d=>d!==today);
+    if(!map[key].length)delete map[key];
+  }else{
+    arr.push(today);map[key]=arr;
+  }
+  writeJsonStore(MENTION_KEY,map);
+  updateMentionUI(t);
+  dictRenderResults();
+};
+el('dictArtForm').onsubmit=e=>{
+  e.preventDefault();
+  const t=dictState.currentTerm;if(!t)return;
+  const f=e.target.elements;
+  const expression=f.expression.value.trim(), eventText=f.event.value.trim();
+  if(!expression||!eventText)return;
+  const entry={
+    id:makeId(),
+    date:f.date.value||todayStamp(),
+    source:f.source.value.trim()||'한국경제',
+    url:f.url.value.trim(),
+    expression,
+    event:eventText,
+    impacts:parseImpactsText(f.impacts.value)
+  };
+  const map=getUserArticlesMap(), key=String(t.id);
+  map[key]=[entry,...(Array.isArray(map[key])?map[key]:[])];
+  writeJsonStore(USER_ART_KEY,map);
+  f.expression.value='';f.event.value='';f.impacts.value='';f.url.value='';
+  f.date.value=todayStamp();
+  el('dictArtDetails').open=false;
+  dictOpen(t);
+  dictRenderResults();
+};
+
+function renderNewsSelectedChips(){
+  const wrap=el('newsSelectedTerms');wrap.replaceChildren();
+  for(const t of dictState.newsSelected){
+    const chip=node('span','');chip.className='termChip';
+    chip.append(document.createTextNode(t.term+' '));
+    const x=button('×',()=>{dictState.newsSelected=dictState.newsSelected.filter(v=>v.id!==t.id);renderNewsSelectedChips()});
+    x.type='button';x.setAttribute('aria-label',t.term+' 제거');
+    chip.append(x);wrap.append(chip);
+  }
+}
+el('newsTermInput').oninput=()=>{
+  const box=el('newsTermSuggest');box.replaceChildren();
+  const q=el('newsTermInput').value;
+  if(!dictState.terms||!dictNorm(q))return;
+  const hits=dictSearch(q).filter(t=>!dictState.newsSelected.some(s=>s.id===t.id)).slice(0,6);
+  for(const t of hits){
+    const b=button(t.term+(t.alts.length?' ('+t.alts.join(', ')+')':''),()=>{
+      dictState.newsSelected.push(t);
+      el('newsTermInput').value='';
+      box.replaceChildren();
+      renderNewsSelectedChips();
+    });
+    b.type='button';box.append(b);
+  }
+};
+function renderNewsMemos(){
+  const list=el('newsMemoList');list.replaceChildren();
+  const memos=getNewsMemos().slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  el('newsMemoStatus').textContent=memos.length?'총 '+memos.length+'개의 기사 메모가 쌓였어요.':'아직 기록한 기사 메모가 없어요. 오늘 읽은 한경 기사부터 한 줄 남겨 보세요.';
+  for(const m of memos){
+    const card=node('div','');card.className='newsCard';
+    const head=node('div','');head.className='newsCardHead';
+    head.append(node('h4',m.title));
+    const del=button('삭제',()=>{
+      if(!confirm('이 기사 메모를 삭제할까요?'))return;
+      writeJsonStore(NEWS_MEMO_KEY,getNewsMemos().filter(v=>v.id!==m.id));
+      renderNewsMemos();
+    });
+    del.type='button';del.className='artDel';
+    head.append(del);
+    card.append(head);
+    const meta=node('div','');meta.className='artMeta';
+    meta.append(node('span',[m.date,m.source].filter(Boolean).join(' · ')));
+    const u=safeUrl(m.url);
+    if(u){const link=node('a','원문 기사 보기 ↗');link.href=u;link.target='_blank';link.rel='noopener noreferrer';link.className='artLink';meta.append(link)}
+    card.append(meta);
+    if(Array.isArray(m.termIds)&&m.termIds.length){
+      const chips=node('div','');chips.className='chipWrap';
+      for(const id of m.termIds){
+        const term=dictState.byId.get(Number(id));
+        const label=term?term.term:('용어 #'+id);
+        const c=button(label,()=>{if(term)dictOpen(term)});
+        c.type='button';c.className='termChip clickable';
+        chips.append(c);
+      }
+      card.append(chips);
+    }
+    const note=node('p',m.note);note.className='newsNote';
+    card.append(note);
+    list.append(card);
+  }
+}
+el('newsMemoForm').onsubmit=e=>{
+  e.preventDefault();
+  const f=e.target.elements;
+  const title=f.title.value.trim(), note=f.note.value.trim();
+  if(!title||!note)return;
+  const entry={
+    id:makeId(),
+    date:f.date.value||todayStamp(),
+    source:f.source.value.trim()||'한국경제',
+    title,
+    url:f.url.value.trim(),
+    termIds:dictState.newsSelected.map(t=>t.id),
+    note
+  };
+  writeJsonStore(NEWS_MEMO_KEY,[entry,...getNewsMemos()]);
+  e.target.reset();
+  f.date.value=todayStamp();
+  f.source.value='한국경제';
+  dictState.newsSelected=[];
+  renderNewsSelectedChips();
+  el('newsTermSuggest').replaceChildren();
+  renderNewsMemos();
+};
+
+function renderFreqTab(){
+  const statsWrap=el('freqStats'), list=el('freqList'), hint=el('freqHint');
+  statsWrap.replaceChildren();list.replaceChildren();
+  if(!dictState.terms){hint.textContent='사전 데이터를 불러오는 중이에요…';return}
+  const statsMap=getTermStatsMap();
+  const memosCount=getNewsMemos().length;
+  let filledTerms=0;
+  for(const t of dictState.terms){
+    const st=statsMap.get(t.id);
+    if((t.articles&&t.articles.length)||(st&&st.articles))filledTerms++;
+  }
+  const trackedCount=statsMap.size;
+  for(const [label,val] of [['기사 메모',memosCount+'건'],['빈도 기록된 용어',trackedCount+'개'],['표현 채워진 용어',filledTerms+'개']]){
+    const b=node('div','');b.className='statBox';b.append(node('small',label),node('b',val));statsWrap.append(b);
+  }
+  const onlyTodo=el('freqOnlyTodo').checked;
+  const rows=[];
+  for(const [id,st] of statsMap.entries()){
+    const t=dictState.byId.get(id);
+    if(!t||!st.total)continue;
+    const artCount=(t.articles?t.articles.length:0)+st.articles;
+    if(onlyTodo&&artCount>0)continue;
+    rows.push({t,st,artCount});
+  }
+  rows.sort((a,b)=>b.st.total-a.st.total||a.artCount-b.artCount||a.t.term.localeCompare(b.t.term,'ko'));
+  hint.textContent=rows.length?'상위 '+Math.min(rows.length,50)+'개 용어 (클릭하면 바로 기사 표현을 입력할 수 있어요)':'아직 빈도 기록이 없어요. 용어 상세에서 ‘+ 오늘 기사에 나옴’을 누르거나 기사 메모에 용어를 태그해 보세요.';
+  rows.slice(0,50).forEach((r,idx)=>{
+    const btn=document.createElement('button');btn.type='button';btn.className='freqRow';
+    const left=node('span','');left.className='freqLeft';
+    const rk=node('span',String(idx+1));rk.className='freqRank';
+    left.append(rk,node('b',r.t.term));
+    const right=node('span','');right.className='freqRight';
+    const cnt=node('span',r.st.total+'회');cnt.className='pill';
+    const stPill=node('span',r.artCount?'표현 '+r.artCount+'건':'표현 미작성');
+    stPill.className=r.artCount?'pill ok':'pill muted';
+    right.append(cnt,stPill);
+    btn.append(left,right);
+    btn.onclick=()=>dictOpen(r.t);
+    list.append(btn);
+  });
+}
+el('freqOnlyTodo').onchange=renderFreqTab;
+
+el('exportArchiveBtn').onclick=()=>{
+  const payload={
+    exportedAt:new Date().toISOString(),
+    userArticles:getUserArticlesMap(),
+    newsMemos:getNewsMemos(),
+    mentions:getMentionsMap()
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=node('a','');a.href=url;a.download='hankyung-archive-'+todayStamp()+'.json';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+  el('backupStatus').textContent='백업 파일을 내려받았어요.';
+};
+el('importArchiveBtn').onclick=()=>el('importArchiveFile').click();
+el('importArchiveFile').onchange=e=>{
+  const file=e.target.files&&e.target.files[0];if(!file)return;
+  file.text().then(txt=>{
+    const data=JSON.parse(txt);
+    if(data.userArticles&&typeof data.userArticles==='object'){
+      const cur=getUserArticlesMap();
+      for(const [id,arr] of Object.entries(data.userArticles)){
+        if(!Array.isArray(arr))continue;
+        const exist=Array.isArray(cur[id])?cur[id]:[];
+        const seen=new Set(exist.map(x=>x.id));
+        cur[id]=[...exist,...arr.filter(x=>x&&!seen.has(x.id))];
+      }
+      writeJsonStore(USER_ART_KEY,cur);
+    }
+    if(Array.isArray(data.newsMemos)){
+      const cur=getNewsMemos(), seen=new Set(cur.map(x=>x.id));
+      writeJsonStore(NEWS_MEMO_KEY,[...cur,...data.newsMemos.filter(x=>x&&!seen.has(x.id))]);
+    }
+    if(data.mentions&&typeof data.mentions==='object'){
+      const cur=getMentionsMap();
+      for(const [id,dates] of Object.entries(data.mentions)){
+        if(!Array.isArray(dates))continue;
+        const set=new Set([...(Array.isArray(cur[id])?cur[id]:[]),...dates]);
+        cur[id]=[...set];
+      }
+      writeJsonStore(MENTION_KEY,cur);
+    }
+    el('backupStatus').textContent='백업 기록을 불러왔어요.';
+    renderFreqTab();renderNewsMemos();dictRenderResults();
+  }).catch(()=>{el('backupStatus').textContent='올바른 백업 JSON 파일이 아니에요.'});
+  e.target.value='';
+};
+
+function dictStart(){
+  if(!dictState.terms){
+    el('dictCount').textContent='용어를 불러오는 중이에요…';
+    dictLoad().then(()=>{dictRenderResults();if(dictState.tab==='news')renderNewsMemos();if(dictState.tab==='freq')renderFreqTab()}).catch(()=>{el('dictCount').textContent='사전 데이터를 불러오지 못했어요. 배포된 사이트 주소에서 열어 주세요.'});
+    return;
+  }
+  dictRenderResults();
+  if(dictState.tab==='news')renderNewsMemos();
+  if(dictState.tab==='freq')renderFreqTab();
+}
+el('dictFind').oninput=()=>{dictState.limit=20;dictRenderResults()};
+el('dictMore').onclick=()=>{dictState.limit+=20;dictRenderResults()};
+
+const dailyClosedKey='daily-econ-closed-v1', dailyPickKey='daily-econ-picks-v1';
 function pickTwoTerms(terms,forceNew){
   const today=todayStamp();
+  const todayIds=getTodayArticleTermIds();
+  const todaySet=new Set(todayIds);
+  if(!forceNew&&todayIds.length){
+    const chosen=todayIds.map(id=>terms.find(t=>t.id===id)).filter(Boolean).slice(0,2);
+    if(chosen.length===1){
+      const pool=terms.filter(t=>t.plain&&t.id!==chosen[0].id);
+      const src=pool.length?pool:terms.filter(t=>t.id!==chosen[0].id);
+      chosen.push(src[Math.floor(Math.random()*src.length)]);
+    }
+    if(chosen.length===2){
+      try{localStorage.setItem(dailyPickKey,JSON.stringify({date:today,ids:chosen.map(t=>t.id),fromToday:true}))}catch{}
+      return chosen.map(t=>({term:t,fromToday:todaySet.has(t.id)}));
+    }
+  }
   if(!forceNew){
     try{
       const saved=JSON.parse(localStorage.getItem(dailyPickKey)||'null');
       if(saved&&saved.date===today&&Array.isArray(saved.ids)&&saved.ids.length===2){
         const found=saved.ids.map(id=>terms.find(t=>t.id===id)).filter(Boolean);
-        if(found.length===2)return found;
+        if(found.length===2)return found.map(t=>({term:t,fromToday:todaySet.has(t.id)}));
       }
     }catch{}
   }
@@ -472,8 +1011,8 @@ function pickTwoTerms(terms,forceNew){
   let i2=Math.floor(Math.random()*(src.length-1));
   if(i2>=i1)i2++;
   const pair=[src[i1],src[i2]];
-  try{localStorage.setItem(dailyPickKey,JSON.stringify({date:today,ids:pair.map(t=>t.id)}))}catch{}
-  return pair;
+  try{localStorage.setItem(dailyPickKey,JSON.stringify({date:today,ids:pair.map(t=>t.id),fromToday:false}))}catch{}
+  return pair.map(t=>({term:t,fromToday:todaySet.has(t.id)}));
 }
 function renderDailyTerms(forceNew){
   const list=el('dailyList');
@@ -481,9 +1020,16 @@ function renderDailyTerms(forceNew){
   list.replaceChildren(node('p','용어를 불러오는 중이에요…'));
   dictLoad().then(terms=>{
     const pair=pickTwoTerms(terms,forceNew);
+    const hasToday=pair.some(x=>x.fromToday);
+    const sub=document.querySelector('#dailyOverlay .dailySub');
+    if(sub)sub.textContent=hasToday
+      ?'오늘 기록한 기사에 나온 용어를 우선으로 보여 드려요. 가볍게 읽고 닫으면 나의 취향 페이지가 열립니다.'
+      :'간단한 뜻만 가볍게 읽고 닫으면 나의 취향 페이지가 열립니다. 자세한 내용은 경제 사전에서 볼 수 있어요.';
     list.replaceChildren();
-    pair.forEach((t,idx)=>{
+    pair.forEach((item,idx)=>{
+      const t=item.term;
       const card=document.createElement('div');card.className='dailyItem';
+      if(item.fromToday){const tag=node('span','오늘 기사에 나온 용어');tag.className='dailyTag';card.append(tag)}
       const top=document.createElement('div');top.className='dailyItemTop';
       const h=document.createElement('h3');
       const num=document.createElement('span');num.className='dailyNum';num.textContent=String(idx+1).padStart(2,'0');
