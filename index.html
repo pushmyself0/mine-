@@ -336,7 +336,7 @@ button.photoThumb:hover{border-color:var(--blue)}
       <a href="#memo" data-route="memo">메모장</a>
       <a href="#money" data-route="money">경제 관념 다듬기</a>
       <a href="#dictionary" data-route="dictionary">경제 사전</a>
-      <a href="#news" data-route="news">오늘의 기사 메모</a>
+      <a href="#flow" data-route="flow">신문 요약 및 흐름 형성</a>
       <div class="railDivider" aria-hidden="true"></div>
       <button type="button" id="openDailyBtn" class="dailyTrigger">오늘의 경제용어</button>
     </nav>
@@ -359,7 +359,7 @@ button.photoThumb:hover{border-color:var(--blue)}
 </nav></main>
 <main id="dictionary" hidden>
 <h1>경제 사전</h1>
-<p class="intro">정식 명칭이나 약어(예: BW, CB, PDI)로 찾고, 매일 읽은 한경 기사의 표현과 메모를 용어와 연결해 보세요.</p>
+<p class="intro">정식 명칭이나 약어(예: BW, CB, PDI)로 찾아보세요. 신문 요약은 ‘신문 요약 및 흐름 형성’에서 기록할 수 있어요.</p>
 <div class="dictTabs" role="tablist" aria-label="경제 사전 보기 전환">
   <button type="button" role="tab" id="tabBtnSearch" aria-selected="true">용어 검색</button>
   <button type="button" role="tab" id="tabBtnFreq" aria-selected="false">기사 빈도 TOP</button>
@@ -387,21 +387,7 @@ button.photoThumb:hover{border-color:var(--blue)}
       <p id="dictDef" class="entryText bookDef"></p>
       <h3>기사 속 표현</h3>
       <div id="dictArticles"></div>
-      <details id="dictArtDetails" class="dictFormBox">
-        <summary>+ 사진 추가 (기사 속 표현 캡처)</summary>
-        <form id="dictArtForm">
-          <label class="photoPick">기사에서 이 용어가 나온 부분 캡처 (여러 장 가능)<input type="file" name="photos" accept="image/*" multiple></label>
-          <div id="dictArtPreview" class="photoGrid"></div>
-          <div class="formRow2">
-            <label>기사 날짜<input type="date" name="date" required></label>
-            <label>한 줄 메모 (선택)<input name="note" maxlength="200" placeholder="예: 금리 동결 기사"></label>
-          </div>
-          <label class="checkLine"><input type="checkbox" name="autoSummary" checked> 저장하고 AI로 요약하기</label>
-          <button type="submit" name="save">사진 저장</button>
-          <p id="dictArtStatus" role="status" class="formNotice"></p>
-          <small class="formNotice">캡처한 화면을 폼 안에서 Ctrl+V로 붙여넣어도 됩니다. 사진은 이 브라우저에만 저장되고 사이트에 공개되지 않아요. AI 요약을 쓰면 요약을 위해 그 사진이 Google Gemini로 전송돼요. 기사 전체가 아니라 표현이 나온 부분만 캡처해 주세요.</small>
-        </form>
-      </details>
+      
       <h3>연관 용어</h3>
       <div id="dictRelated" class="relWrap"></div>
       <small id="dictSource"></small>
@@ -428,10 +414,10 @@ button.photoThumb:hover{border-color:var(--blue)}
 </div>
 </main>
 <main id="newsPage" hidden>
-<h1>오늘의 기사 메모</h1>
-<p class="intro">매일 읽은 한경 기사 캡처와 한 줄 해석을 기록하고, 관련 경제 용어와 연결해 보세요.</p>
+<h1>신문 요약 및 흐름 형성</h1>
+<p class="intro">매일 읽은 신문 기사 캡처를 올리면 AI가 요약하고, 날짜순으로 쌓아 흐름을 볼 수 있어요.</p>
 <section>
-    <h2>오늘의 기사 메모 작성</h2>
+    <h2>신문 요약 기록하기</h2>
     <form id="newsMemoForm">
       <div class="formRow2">
         <label>날짜<input type="date" name="date" required></label>
@@ -452,7 +438,7 @@ button.photoThumb:hover{border-color:var(--blue)}
     </form>
   </section>
   <section>
-    <h2>쌓인 기사 메모</h2>
+    <h2>요약 타임라인</h2>
     <p id="newsMemoStatus" role="status"></p>
     <div id="newsMemoList"></div>
   </section>
@@ -640,7 +626,7 @@ function route(){
   const k=location.hash.slice(1),
     isJournal=Object.hasOwn(journalTypes,k),
     isDict=k==='dictionary',
-    isNews=k==='news',
+    isNews=k==='flow'||k==='news',
     isHome=k!=='study'&&k!=='exercise'&&!isJournal&&!isDict&&!isNews;
   el('fitness').hidden=k!=='exercise';
   if(k==='exercise')renderSports();
@@ -1037,29 +1023,6 @@ el('dictMentionBtn').onclick=()=>{
   updateMentionUI(t);
   dictRenderResults();
 };
-const dictArtPicker=makePhotoPicker(el('dictArtForm'),el('dictArtForm').elements.photos,el('dictArtPreview'));
-el('dictArtForm').onsubmit=async e=>{
-  e.preventDefault();
-  const t=dictState.currentTerm;if(!t)return;
-  const f=e.target.elements,status=el('dictArtStatus');
-  if(!dictArtPicker.count()){status.textContent='기사 캡처 사진을 먼저 선택해 주세요.';return}
-  f.save.disabled=true;status.textContent='사진을 저장하는 중이에요…';
-  try{
-    const photoIds=await savePickedPhotos(dictArtPicker.files());
-    const auto=f.autoSummary.checked;
-    const entry={id:makeId(),date:f.date.value||todayStamp(),source:'한국경제',note:f.note.value.trim(),photoIds};
-    const map=getUserArticlesMap(),key=String(t.id);
-    map[key]=[entry,...(Array.isArray(map[key])?map[key]:[])];
-    if(!writeJsonStore(USER_ART_KEY,map)){await photoDeleteMany(photoIds);throw new Error('store')}
-    dictArtPicker.clear();f.note.value='';f.date.value=todayStamp();
-    status.textContent='';el('dictArtDetails').open=false;
-    dictOpen(t);dictRenderResults();
-    if(auto&&photoIds.length)runSummary({kind:'term',termId:t.id,entryId:entry.id},photoIds,true);
-  }catch{
-    status.textContent='사진을 저장하지 못했어요. 이미지 파일인지, 브라우저 저장 공간이 충분한지 확인해 주세요.';
-  }finally{f.save.disabled=false}
-};
-
 function renderNewsSelectedChips(){
   const wrap=el('newsSelectedTerms');wrap.replaceChildren();
   for(const t of dictState.newsSelected){
@@ -1089,8 +1052,10 @@ const newsPicker=makePhotoPicker(el('newsMemoForm'),el('newsMemoForm').elements.
 function renderNewsMemos(){
   const list=el('newsMemoList');list.replaceChildren();
   const memos=getNewsMemos().slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  el('newsMemoStatus').textContent=memos.length?'총 '+memos.length+'개의 기사 메모가 쌓였어요.':'아직 기록한 기사 메모가 없어요. 오늘 읽은 한경 기사 캡처부터 올려 보세요.';
+  el('newsMemoStatus').textContent=memos.length?'총 '+memos.length+'건의 신문 요약이 쌓였어요.':'아직 기록한 신문 요약이 없어요. 오늘 읽은 기사 캡처부터 올려 보세요.';
+  let lastDate='';
   for(const m of memos){
+    if(m.date!==lastDate){lastDate=m.date;const dh=node('h3',m.date||'날짜 없음');dh.style.marginTop='24px';list.append(dh)}
     const card=node('div','');card.className='newsCard';
     const head=node('div','');head.className='newsCardHead';
     head.append(node('h4',m.title||'기사 캡처 메모'));
