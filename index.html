@@ -311,6 +311,16 @@ button.photoThumb:hover{border-color:var(--blue)}
     </div>
   </div>
 </div>
+<dialog id="quotaBox" aria-labelledby="quotaTitle">
+  <h2 id="quotaTitle">AI 요약 한도에 도달했어요</h2>
+  <p id="quotaMsg" class="intro" style="margin-bottom:18px"></p>
+  <div class="dailyActions" style="justify-content:flex-end;flex-wrap:wrap;gap:8px">
+    <button type="button" id="quotaRetry">다시 시도</button>
+    <button type="button" id="quotaRead">나머지는 내가 읽을게</button>
+    <button type="button" id="quotaStop" class="primary">그만 요약해줘</button>
+  </div>
+  <small class="formNotice">‘그만 요약해줘’와 ‘나머지는 내가 읽을게’를 누르면 오늘 하루 자동 요약이 멈추고, 사진과 기록은 그대로 남아요. 내일 다시 요약할 수 있어요.</small>
+</dialog>
 <div id="photoLightbox" hidden role="dialog" aria-modal="true" aria-label="기사 사진 크게 보기"><img id="photoLightboxImg" alt="기사 캡처 사진 확대"><button type="button" id="photoLightboxClose">닫기</button></div>
 <div class="shell">
 <aside class="rail">
@@ -853,6 +863,7 @@ async function requestSummary(photoIds,hint){
   }catch{throw new Error('network')}
   let data={};try{data=await res.json()}catch{}
   if(res.status===401){sessionStorage.removeItem(AI_PASS_KEY);throw new Error('auth')}
+  if(res.status===429)throw new Error('quota:'+(data.error||'AI 요약 한도에 도달했어요.'));
   if(res.status===404||res.status===405||res.status===501)throw new Error('noserver');
   if(!res.ok)throw new Error('msg:'+(data.error||('오류 '+res.status)));
   if(!data.summary)throw new Error('msg:요약 결과가 비어 있어요.');
@@ -893,13 +904,42 @@ function refreshAfterSummary(target){
     if(dictState.currentTerm&&dictState.currentTerm.id===Number(target.termId))renderTermArticles(dictState.currentTerm);
   }else renderNewsMemos();
 }
-async function runSummary(target,photoIds){
+const AI_STOP_KEY='ai-summary-stop-v1';
+function aiStoppedToday(){try{return localStorage.getItem(AI_STOP_KEY)===todayStamp()}catch{return false}}
+function stopAiToday(){try{localStorage.setItem(AI_STOP_KEY,todayStamp())}catch{}}
+function askQuotaChoice(message){
+  return new Promise(resolve=>{
+    const box=el('quotaBox');
+    el('quotaMsg').textContent=message+' 어떻게 할까요?';
+    const done=v=>{box.close();resolve(v)};
+    el('quotaRetry').onclick=()=>done('retry');
+    el('quotaRead').onclick=()=>done('stop');
+    el('quotaStop').onclick=()=>done('stop');
+    box.oncancel=e=>{e.preventDefault();done('stop')};
+    box.showModal();
+  });
+}
+async function runSummary(target,photoIds,fromAuto){
   const id=target.entryId;
+  if(aiStoppedToday()){
+    summaryUi.err.set(id,'오늘은 AI 요약을 멈췄어요. 내일 다시 요약할 수 있어요. 사진은 그대로 있어요.');
+    refreshAfterSummary(target);
+    return;
+  }
   summaryUi.busy.add(id);summaryUi.err.delete(id);refreshAfterSummary(target);
   try{
     const s=await requestSummary(photoIds,hintFor(target));
     if(!saveSummary(target,s))throw new Error('msg:요약을 저장하지 못했어요.');
-  }catch(err){summaryUi.err.set(id,summaryErrorText(err))}
+  }catch(err){
+    const m=String(err&&err.message||'');
+    if(m.startsWith('quota:')){
+      summaryUi.busy.delete(id);refreshAfterSummary(target);
+      const choice=await askQuotaChoice(m.slice(6));
+      if(choice==='retry'){summaryUi.busy.delete(id);return runSummary(target,photoIds,fromAuto)}
+      stopAiToday();
+      summaryUi.err.set(id,'오늘은 AI 요약을 멈췄어요. 내일 다시 요약할 수 있어요. 사진은 그대로 있어요.');
+    }else summaryUi.err.set(id,summaryErrorText(err));
+  }
   finally{summaryUi.busy.delete(id);refreshAfterSummary(target)}
 }
 function renderSummaryBlock(entry,target){
@@ -1014,7 +1054,7 @@ el('dictArtForm').onsubmit=async e=>{
     dictArtPicker.clear();f.note.value='';f.date.value=todayStamp();
     status.textContent='';el('dictArtDetails').open=false;
     dictOpen(t);dictRenderResults();
-    if(auto&&photoIds.length)runSummary({kind:'term',termId:t.id,entryId:entry.id},photoIds);
+    if(auto&&photoIds.length)runSummary({kind:'term',termId:t.id,entryId:entry.id},photoIds,true);
   }catch{
     status.textContent='사진을 저장하지 못했어요. 이미지 파일인지, 브라우저 저장 공간이 충분한지 확인해 주세요.';
   }finally{f.save.disabled=false}
@@ -1114,7 +1154,7 @@ el('newsMemoForm').onsubmit=async e=>{
     el('newsTermSuggest').replaceChildren();
     status.textContent='';
     renderNewsMemos();
-    if(auto&&photoIds.length)runSummary({kind:'memo',entryId:entry.id},photoIds);
+    if(auto&&photoIds.length)runSummary({kind:'memo',entryId:entry.id},photoIds,true);
   }catch{
     status.textContent='저장하지 못했어요. 이미지 파일인지, 브라우저 저장 공간이 충분한지 확인해 주세요.';
   }finally{submitBtn.disabled=false}
