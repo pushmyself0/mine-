@@ -1,103 +1,111 @@
-<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>나의 취향들</title>
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>알로하</title>
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Gowun+Batang:wght@400;700&display=swap');
 *{box-sizing:border-box}
 :root{
-  --bg:#f5f5f3;
+  --bg:#f7f5f0;
   --surface:#ffffff;
-  --ink:#161616;
-  --muted:#6d6d69;
-  --line:#e3e3de;
-  --blue:#0a22d8;
-  --blue-hover:#0719a8;
-  --blue-soft:#eef1ff;
+  --ink:#171614;
+  --muted:#78746c;
+  --line:#e6e2d8;
+  --blue:#182985;
+  --blue-hover:#101d63;
+  --blue-soft:#eef0f8;
+  --serif:'Gowun Batang','Cormorant Garamond',Georgia,serif;
 }
-html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:15px/1.6 'Pretendard',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;word-break:keep-all;-webkit-font-smoothing:antialiased}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:15px/1.65 'Pretendard',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;word-break:keep-all;-webkit-font-smoothing:antialiased}
 [hidden]{display:none!important}
 a{color:var(--ink)}
 button,summary{cursor:pointer;font:inherit}
-button{border:1px solid #d2d2cc;border-radius:6px;background:var(--surface);padding:8px 14px;color:var(--ink);transition:background .15s,border-color .15s,color .15s}
-button:hover{border-color:#9b9b94}
+button{border:1px solid #d9d4c9;border-radius:8px;background:var(--surface);padding:8px 15px;color:var(--ink);transition:background .18s,border-color .18s,color .18s,transform .15s}
+button:hover{border-color:#9e988c}
 form button,.primary{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
 form button:hover,.primary:hover{background:var(--blue-hover);border-color:var(--blue-hover)}
 summary{font-weight:650}
-label{display:block;margin:10px 0;font-size:14px;color:var(--muted)}
-input,select,textarea{font:inherit;max-width:100%;padding:9px 11px;border:1px solid #d4d4ce;border-radius:6px;background:#fff;color:var(--ink);margin-top:4px}
-input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-offset:1px;border-color:var(--blue)}
+label{display:block;margin:10px 0;font-size:13.5px;color:var(--muted)}
+input,select,textarea{font:inherit;max-width:100%;padding:10px 12px;border:1px solid #ddd8cd;border-radius:8px;background:#fff;color:var(--ink);margin-top:5px;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,41,133,.1)}
 input:not([type=checkbox]),select{display:block;width:100%}
 small,footer{color:var(--muted)}
-h1{font-size:clamp(28px,4vw,42px);letter-spacing:-.04em;font-weight:750;margin:0 0 12px;line-height:1.18}
-h2{font-size:20px;letter-spacing:-.02em;font-weight:700;margin:0 0 16px}
+h1{font-family:var(--serif);font-size:clamp(30px,4vw,42px);letter-spacing:-.02em;font-weight:700;margin:0 0 22px;line-height:1.2}
+h2{font-size:19px;letter-spacing:-.02em;font-weight:700;margin:0 0 16px}
 h3{font-size:15px;letter-spacing:-.01em;font-weight:700;margin:18px 0 6px}
 
-/* Editorial two-column shell matching reference */
-.shell{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh;width:100%}
-.rail{position:sticky;top:0;height:100vh;padding:34px 28px 28px 34px;display:flex;flex-direction:column;justify-content:space-between;background:var(--bg)}
-.railTop{display:flex;flex-direction:column;gap:34px}
+/* Editorial two-column shell */
+.shell{display:grid;grid-template-columns:256px minmax(0,1fr);min-height:100vh;width:100%}
+.rail{position:sticky;top:0;height:100vh;padding:38px 28px 30px 38px;display:flex;flex-direction:column;justify-content:space-between;background:var(--bg);border-right:1px solid rgba(230,226,216,.65)}
+.railTop{display:flex;flex-direction:column;gap:36px}
 
-/* Iconic cobalt-blue square brand mark */
+/* Architectural deep-indigo brand mark */
 .brandBox{
-  position:relative;display:flex;flex-direction:column;justify-content:flex-start;
-  width:172px;height:172px;padding:18px 20px;
-  background:var(--blue);color:#fff;text-decoration:none;
-  box-shadow:0 10px 26px rgba(10,34,216,.18);
-  transition:transform .2s ease,box-shadow .2s ease;
+  position:relative;display:flex;flex-direction:column;justify-content:space-between;
+  width:176px;height:176px;padding:22px 22px 18px;
+  background:linear-gradient(145deg,#1d319c 0%,#111e66 100%);color:#fff;text-decoration:none;
+  border-radius:3px;
+  box-shadow:0 14px 34px rgba(17,30,102,.18),inset 0 0 0 1px rgba(255,255,255,.12);
+  transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s ease;
 }
-.brandBox:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(10,34,216,.24)}
-.brandLines{font-size:44px;font-weight:800;line-height:1.06;letter-spacing:-.05em}
+.brandBox:hover{transform:translateY(-3px);box-shadow:0 20px 42px rgba(17,30,102,.24),inset 0 0 0 1px rgba(255,255,255,.18)}
+.brandLines{font-family:var(--serif);font-size:38px;font-weight:700;line-height:1.15;letter-spacing:.02em}
 .brandLines span{display:block}
+.brandSub{font-family:'Cormorant Garamond',Georgia,serif;font-size:12px;letter-spacing:.26em;opacity:.78;text-transform:uppercase}
 .brandSide{
   position:absolute;right:14px;bottom:16px;
   writing-mode:vertical-rl;transform:rotate(180deg);
-  font-size:11px;letter-spacing:.14em;font-weight:500;opacity:.88;text-transform:lowercase;
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:11px;letter-spacing:.24em;font-weight:600;opacity:.75;text-transform:uppercase;
 }
 
 .railNav{display:flex;flex-direction:column;gap:14px}
 .railNav a,.railNav button{
   display:block;width:fit-content;padding:2px 0;border:0;background:transparent;border-radius:0;
   text-decoration:none;text-align:left;
-  font-size:16px;font-weight:450;letter-spacing:.01em;color:var(--ink);
+  font-size:15.5px;font-weight:450;letter-spacing:.01em;color:#2b2926;
   border-bottom:1.5px solid transparent;
-  transition:color .15s,border-color .15s;
+  transition:color .18s,border-color .18s;
 }
 .railNav a:hover,.railNav button:hover{color:var(--blue);border-color:var(--blue)}
 .railNav a[aria-current=page]{color:var(--blue);font-weight:700;border-color:var(--blue)}
-.railDivider{width:28px;height:1px;background:#d6d6d0;margin:4px 0}
-.railNav .dailyTrigger{font-size:14px;color:var(--muted)}
+.railDivider{width:24px;height:1px;background:#d6d0c4;margin:6px 0}
+.railNav .dailyTrigger{font-size:13.5px;color:var(--muted)}
 .railNav .dailyTrigger:hover{color:var(--blue)}
+.railLock{margin-bottom:12px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid var(--line);background:#fff;color:var(--muted);width:fit-content}
+.railLock:hover{border-color:var(--blue);color:var(--blue)}
+.railLock.unlocked{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
 
-.railFoot{font-size:12px;line-height:1.9;color:#787873;letter-spacing:.01em}
+.railFoot{font-size:11.5px;line-height:1.95;color:#858077;letter-spacing:.02em}
 .railFoot div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* Right editorial stage */
-.stage{padding:34px 48px 56px 36px;min-width:0}
-.topBar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;padding-bottom:12px;border-bottom:1px solid var(--line)}
-.topBar a{font-size:14px;text-decoration:none;color:var(--muted)}
+.stage{padding:40px 56px 64px 44px;min-width:0}
+.topBar{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.topBar a{font-size:13.5px;text-decoration:none;color:var(--muted);letter-spacing:.01em}
 .topBar a:hover{color:var(--blue)}
 
-/* Home editorial masonry grid (borderless photo + clean title & excerpt) */
-.shelf{column-count:3;column-gap:34px}
+/* Home editorial masonry grid */
+.shelf{column-count:3;column-gap:38px}
 .magCard{
-  display:inline-block;width:100%;break-inside:avoid;margin:0 0 42px;
+  display:inline-block;width:100%;break-inside:avoid;margin:0 0 44px;
   text-decoration:none;color:var(--ink);vertical-align:top;
 }
-.magMedia{overflow:hidden;background:#e8e8e3}
-.magMedia img{display:block;width:100%;height:auto;object-fit:cover;transition:transform .45s cubic-bezier(.22,1,.36,1)}
+.magMedia{overflow:hidden;background:#e8e4dc;border-radius:3px;box-shadow:0 8px 26px rgba(23,22,20,.06);transition:box-shadow .35s ease}
+.magCard:hover .magMedia{box-shadow:0 14px 36px rgba(23,22,20,.12)}
+.magMedia img{display:block;width:100%;height:auto;object-fit:cover;transition:transform .55s cubic-bezier(.22,1,.36,1)}
 .magCard.tall .magMedia img{aspect-ratio:3/4}
 .magCard.square .magMedia img{aspect-ratio:1/1}
 .magCard.wide .magMedia img{aspect-ratio:4/3}
-.magCard:hover .magMedia img{transform:scale(1.03)}
-.magCard strong{display:block;margin-top:14px;font-size:16.5px;font-weight:700;letter-spacing:-.02em;line-height:1.35;color:var(--ink);transition:color .15s}
+.magCard:hover .magMedia img{transform:scale(1.035)}
+.magCard strong{display:block;margin-top:15px;font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.35;color:var(--ink);transition:color .18s}
 .magCard:hover strong{color:var(--blue)}
-.magCard span{display:block;margin-top:6px;font-size:13.5px;line-height:1.65;color:var(--muted)}
 
 /* Subpage cards & sections */
 main:not(#home):not(#museum){max-width:860px}
-.intro{margin:0 0 24px;color:var(--muted);font-size:15px}
-section,details{background:var(--surface);padding:24px;border:1px solid var(--line);border-radius:10px;margin-bottom:16px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.week{background:#18181b;color:#fff;border-radius:10px;padding:18px;display:flex;gap:6px;margin:14px 0 22px}
-.week button{flex:1;background:transparent;color:#d4d4d8;border:0;padding:9px 2px;border-radius:6px}
+.intro{margin:0 0 24px;color:var(--muted);font-size:14.5px}
+section,details{background:var(--surface);padding:26px;border:1px solid var(--line);border-radius:14px;margin-bottom:18px;box-shadow:0 2px 14px rgba(23,22,20,.025)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.week{background:#181715;color:#fff;border-radius:12px;padding:18px;display:flex;gap:6px;margin:14px 0 22px}
+.week button{flex:1;background:transparent;color:#cfc9be;border:0;padding:9px 2px;border-radius:8px}
 .week button:hover{color:#fff}
 .week button[aria-pressed=true]{background:var(--blue);color:#fff}
 .week span{display:block;font-size:21px;font-weight:700}
@@ -105,10 +113,10 @@ section,details{background:var(--surface);padding:24px;border:1px solid var(--li
 .row p{margin:4px 0;color:var(--muted)}
 .row button{font-size:13px;margin:3px;padding:5px 10px}
 .over{color:#b42318}
-footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
 footer a{color:var(--muted)}
-dialog{width:min(440px,92vw);border:1px solid var(--line);border-radius:12px;padding:24px;color:var(--ink);box-shadow:0 24px 60px rgba(0,0,0,.16)}
-dialog::backdrop{background:rgba(16,16,20,.45)}
+dialog{width:min(460px,92vw);border:1px solid var(--line);border-radius:16px;padding:28px;color:var(--ink);box-shadow:0 28px 70px rgba(17,16,14,.2)}
+dialog::backdrop{background:rgba(20,19,17,.45);backdrop-filter:blur(5px)}
 
 .journal{max-width:760px}
 .journal textarea{font:inherit;width:100%;min-height:95px}
@@ -246,7 +254,7 @@ dialog::backdrop{background:rgba(16,16,20,.45)}
 .museumTextCover q{display:block;margin-top:14px;font-size:15px;line-height:1.6;color:#262626;quotes:none}
 .museumMeta{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--muted)}
 .museumMood{padding:2px 8px;border-radius:999px;background:var(--blue-soft);color:var(--blue);font-weight:600}
-.museumCard strong{display:block;margin-top:6px;font-size:16.5px;font-weight:700;letter-spacing:-.02em;line-height:1.38;color:var(--ink);transition:color .15s}
+.museumCard strong{display:block;margin-top:8px;font-family:var(--serif);font-size:17.5px;font-weight:700;letter-spacing:-.01em;line-height:1.38;color:var(--ink);transition:color .18s}
 .museumCard:hover strong{color:var(--blue)}
 .museumCard .mExcerpt{display:block;margin-top:6px;font-size:13.5px;line-height:1.65;color:var(--muted);white-space:pre-line}
 dialog.museumDlg{width:min(640px,94vw);max-height:88vh;overflow:auto}
@@ -256,7 +264,7 @@ dialog.museumDlg{width:min(640px,94vw);max-height:88vh;overflow:auto}
 .museumDlgAct{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
 @media(max-width:960px){.museumGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.museumGrid{grid-template-columns:1fr}.calCell{min-height:54px;padding:4px}}
-body.viewer #newsTabBtnWrite,body.viewer #newsTabWrite,body.viewer #newsNextToLine,body.viewer #newsPrevToWrite,body.viewer #flowForm,body.viewer #newsPage .artDel,body.viewer .aiBtn,body.viewer .flowOwner{display:none!important}
+body.viewer #newsTabBtnWrite,body.viewer #newsTabWrite,body.viewer #newsNextToLine,body.viewer #newsPrevToWrite,body.viewer #flowForm,body.viewer #newsPage .artDel,body.viewer .aiBtn,body.viewer .flowOwner,body.viewer .flowMineBox,body.viewer #museumOpenWrite,body.viewer #museumReadBox .museumDlgAct button:not(.primary),body.viewer #calEventForm,body.viewer #study .primary,body.viewer #study button[onclick*="courseBox"],body.viewer #study #routinePanel details,body.viewer #study .artDel,body.viewer #journal section,body.viewer #dictMentionBtn,body.viewer #importArchiveBtn{display:none!important}
 .dayFile{margin:0 0 10px;padding:12px 16px}
 .dayFile summary{font-weight:650;font-size:14.5px}
 .dayItem{border-top:1px solid var(--line);padding:10px 0 4px;margin-top:10px}
@@ -384,7 +392,7 @@ button.photoThumb:hover{border-color:var(--blue)}
   <div class="dailyCard">
     <div class="dailyMeta"><span>TODAY'S ECONOMICS</span><span id="dailyDate"></span></div>
     <h2 id="dailyHeading">오늘의 경제용어 2가지</h2>
-    <p class="dailySub">간단한 뜻만 가볍게 읽고 닫으면 나의 취향 페이지가 열립니다. 자세한 내용은 경제 사전에서 볼 수 있어요.</p>
+    <p class="dailySub">간단한 뜻만 가볍게 읽고 닫으면 알로하가 열립니다. 자세한 내용은 경제 사전에서 볼 수 있어요.</p>
     <div id="dailyList" class="dailyList"><p class="dailySub">용어를 불러오는 중이에요…</p></div>
     <div class="dailyActions">
       <button type="button" id="dailyShuffle" class="dailyShuffleBtn">다른 2개 뽑기</button>
@@ -406,9 +414,10 @@ button.photoThumb:hover{border-color:var(--blue)}
 <div class="shell">
 <aside class="rail">
   <div class="railTop">
-    <a class="brandBox" href="#home" aria-label="나의 취향들 홈">
-      <div class="brandLines"><span>나의</span><span>취향들</span></div>
-      <span class="brandSide">magazine</span>
+    <a class="brandBox" href="#home" aria-label="알로하 홈">
+      <div class="brandLines"><span>알로하</span></div>
+      <span class="brandSub">aloha</span>
+      <span class="brandSide">archive</span>
     </a>
     <nav class="railNav" aria-label="카테고리 메뉴">
       <a href="#home" data-route="home">HOME</a>
@@ -422,7 +431,8 @@ button.photoThumb:hover{border-color:var(--blue)}
     </nav>
   </div>
   <div class="railFoot">
-    <div>Archive. 나의 취향들</div>
+    <button type="button" id="railLockBtn" class="railLock">🔒 읽기 전용</button>
+    <div>Archive. 알로하</div>
     <div>Terms. 696개 경제용어</div>
     <div id="railToday"></div>
     <div>Addr. Seoul, Korea</div>
@@ -431,15 +441,14 @@ button.photoThumb:hover{border-color:var(--blue)}
 <div class="stage">
 <div class="topBar" id="subTopBar" hidden><a id="backHome" href="#home">← 전체 보기로 돌아가기</a></div>
 <main id="home"><nav class="shelf" aria-label="카테고리 목록">
-<a class="magCard tall" href="#flow"><div class="magMedia"><img src="images/flow.jpg" alt="커피잔과 펼쳐진 신문" loading="eager"></div><strong>신문 요약 및 흐름 형성</strong><span>매일 읽은 신문을 AI로 요약하고, 통찰력 체크리스트로 경제 흐름을 연결하는 공간.</span></a>
-<a class="magCard wide" href="#museum"><div class="magMedia"><img src="images/memo.jpg" alt="손글씨가 적힌 노트와 만년필" loading="eager"></div><strong>박물관</strong><span>내 심경과 사진, 기억하고 싶은 순간들을 매거진처럼 전시해 두는 나만의 박물관.</span></a>
-<a class="magCard tall" href="#study"><div class="magMedia"><img src="images/study.jpg" alt="햇빛이 드는 책상 위 노트와 펜" loading="eager"></div><strong>수업과 과제</strong><span>오늘 수업과 다가오는 마감, 개인 캘린더 일정과 매일 루틴을 정리하는 공간.</span></a>
-<a class="magCard square" href="#money"><div class="magMedia"><img src="images/money.jpg" alt="커튼 그림자가 진 의자 위 커피잔" loading="eager"></div><strong>경제 관념 다듬기</strong><span>어디에 돈을 썼고 어떤 만족이 남았는지 돌아보는 소비 노트.</span></a>
-<a class="magCard wide" href="#dictionary"><div class="magMedia"><img src="images/dictionary.jpg" alt="신문과 노트, 커피가 놓인 나무 테이블" loading="eager"></div><strong>경제 사전</strong><span>뜻이 헷갈리는 696개 경제·금융 용어를 쉬운 한두 문장과 원문으로 찾아보는 사전.</span></a>
+<a class="magCard tall" href="#flow"><div class="magMedia"><img src="images/flow.jpg" alt="커피잔과 펼쳐진 신문" loading="eager"></div><strong>신문 요약 및 흐름 형성</strong></a>
+<a class="magCard wide" href="#museum"><div class="magMedia"><img src="images/memo.jpg" alt="손글씨가 적힌 노트와 만년필" loading="eager"></div><strong>박물관</strong></a>
+<a class="magCard tall" href="#study"><div class="magMedia"><img src="images/study.jpg" alt="햇빛이 드는 책상 위 노트와 펜" loading="eager"></div><strong>수업과 과제</strong></a>
+<a class="magCard square" href="#money"><div class="magMedia"><img src="images/money.jpg" alt="커튼 그림자가 진 의자 위 커피잔" loading="eager"></div><strong>경제 관념 다듬기</strong></a>
+<a class="magCard wide" href="#dictionary"><div class="magMedia"><img src="images/dictionary.jpg" alt="신문과 노트, 커피가 놓인 나무 테이블" loading="eager"></div><strong>경제 사전</strong></a>
 </nav></main>
 <main id="dictionary" hidden>
 <h1>경제 사전</h1>
-<p class="intro">정식 명칭이나 약어(예: BW, CB, PDI)로 찾아보세요. 신문 요약은 ‘신문 요약 및 흐름 형성’에서 기록할 수 있어요.</p>
 <div class="dictTabs" role="tablist" aria-label="경제 사전 보기 전환">
   <button type="button" role="tab" id="tabBtnSearch" aria-selected="true">용어 검색</button>
   <button type="button" role="tab" id="tabBtnFreq" aria-selected="false">기사 빈도 TOP</button>
@@ -495,7 +504,6 @@ button.photoThumb:hover{border-color:var(--blue)}
 </main>
 <main id="newsPage" hidden>
 <h1>신문 요약 및 흐름 형성</h1>
-<p class="intro">매일 읽은 신문 기사 캡처를 올리면 AI가 요약하고, 날짜순으로 쌓아 흐름을 볼 수 있어요.</p>
 <div class="dictTabs" role="tablist" aria-label="신문 요약 보기 전환">
   <button type="button" role="tab" id="newsTabBtnWrite" aria-selected="true">1. 기사 입력</button>
   <button type="button" role="tab" id="newsTabBtnLine" aria-selected="false">2. 요약</button>
@@ -586,7 +594,6 @@ button.photoThumb:hover{border-color:var(--blue)}
 <div class="museumHead">
   <div>
     <h1>박물관</h1>
-    <p class="intro">내 심경과 사진, 기억하고 싶은 순간들을 차곡차곡 전시해 두는 나만의 공간이에요.</p>
   </div>
   <button type="button" id="museumOpenWrite" class="museumWriteBtn">+ 글쓰기</button>
 </div>
@@ -779,9 +786,11 @@ function syncStatusText(){
   return '연동 켜짐 · '+(t?'마지막 동기화 '+String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0'):'동기화 대기 중');
 }
 function renderSyncState(){
-  const s=document.getElementById('syncState'),b=document.getElementById('syncBtn');
+  const unlocked=!!syncPass();
+  const s=document.getElementById('syncState'),b=document.getElementById('syncBtn'),rl=document.getElementById('railLockBtn');
   if(s)s.textContent=syncStatusText()+(syncState.pendingReload?' · 다른 기기의 새 기록이 있어요. 새로고침하면 보여요.':'');
-  if(b)b.textContent=syncPass()?'연동 끊기':'기기 연동';
+  if(b)b.textContent=unlocked?'잠그기 (연동 끊기)':'잠금 해제 · 기기 연동';
+  if(rl){rl.textContent=unlocked?'🔓 편집 가능 · 잠그기':'🔒 읽기 전용 · 잠금 해제';rl.classList.toggle('unlocked',unlocked)}
 }
 function syncErrorText(err){
   const m=String(err&&err.message||'');
@@ -885,6 +894,7 @@ async function syncButton(){
   }finally{btn.disabled=false;renderSyncState()}
 }
 document.getElementById('syncBtn').onclick=syncButton;
+if(document.getElementById('railLockBtn'))document.getElementById('railLockBtn').onclick=syncButton;
 renderSyncState();
 if(syncPass()){syncRun()}else{syncViewerLoad()}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&syncPass())syncRun()});
@@ -1527,7 +1537,7 @@ async function buildDayPdf(source,date,memos){
   }
   pages.forEach((c,i)=>{
     const g=c.getContext('2d');g.font='400 20px '+PDF_FONT;g.fillStyle='#9b9b94';g.textBaseline='top';g.textAlign='right';
-    g.fillText('나의영역 · '+source+' '+date+' · '+(i+1)+'/'+pages.length,PDF_W-PDF_M,PDF_H-PDF_M+20);
+    g.fillText('알로하 · '+source+' '+date+' · '+(i+1)+'/'+pages.length,PDF_W-PDF_M,PDF_H-PDF_M+20);
   });
   const imgs=[];
   for(const c of pages){
@@ -2170,8 +2180,8 @@ function renderDailyTerms(forceNew){
     const hasToday=pair.some(x=>x.fromToday);
     const sub=document.querySelector('#dailyOverlay .dailySub');
     if(sub)sub.textContent=hasToday
-      ?'오늘 기록한 기사에 나온 용어를 우선으로 보여 드려요. 가볍게 읽고 닫으면 나의 취향 페이지가 열립니다.'
-      :'간단한 뜻만 가볍게 읽고 닫으면 나의 취향 페이지가 열립니다. 자세한 내용은 경제 사전에서 볼 수 있어요.';
+      ?'오늘 기록한 기사에 나온 용어를 우선으로 보여 드려요. 가볍게 읽고 닫으면 알로하가 열립니다.'
+      :'간단한 뜻만 가볍게 읽고 닫으면 알로하가 열립니다. 자세한 내용은 경제 사전에서 볼 수 있어요.';
     list.replaceChildren();
     pair.forEach((item,idx)=>{
       const t=item.term;
