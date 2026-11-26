@@ -268,6 +268,9 @@ button.photoThumb:hover{border-color:var(--blue)}
 .aiSummary p{margin:6px 0 0;font-size:14.5px;line-height:1.7;color:#11183c;white-space:pre-wrap}
 .aiBtn{font-size:13px;padding:6px 12px;border-color:var(--blue);color:var(--blue);font-weight:600;margin:4px 0}
 .aiBtn:hover{background:var(--blue-soft)}
+.aiArt{margin-top:12px}.aiArt+.aiArt{border-top:1px dashed var(--blue);padding-top:12px}
+.aiArt h5{margin:0;font-size:15px;line-height:1.5;color:#11183c;font-weight:750}
+.aiArt p{margin:4px 0 0;font-size:14.5px;line-height:1.7;color:#11183c;white-space:pre-wrap}
 .aiBusy{font-size:13px;color:var(--blue);margin:6px 0}
 .aiErr{font-size:13px;color:#b42318;margin:6px 0;line-height:1.5}
 .checkLine{display:flex;align-items:center;gap:8px;margin:12px 0;color:var(--ink);font-size:14px}
@@ -852,9 +855,9 @@ async function requestSummary(photoIds,hint){
   if(res.status===429)throw new Error('quota:'+(data.error||'AI 요약 한도에 도달했어요.'));
   if(res.status===404||res.status===405||res.status===501)throw new Error('noserver');
   if(!res.ok)throw new Error('msg:'+(data.error||('오류 '+res.status)));
-  if(!data.summary)throw new Error('msg:요약 결과가 비어 있어요.');
+  if(!Array.isArray(data.articles)||!data.articles.length)throw new Error('msg:요약 결과가 비어 있어요.');
   sessionStorage.setItem(AI_PASS_KEY,pass);
-  return {title:String(data.title||''),summary:String(data.summary)};
+  return {articles:data.articles.map(a=>({title:String(a.title||''),summary:String(a.summary||'')})).filter(a=>a.summary)};
 }
 function summaryErrorText(err){
   const m=String(err&&err.message||'');
@@ -877,12 +880,12 @@ function saveSummary(target,summary){
   if(target.kind==='term'){
     const map=getUserArticlesMap(),arr=Array.isArray(map[String(target.termId)])?map[String(target.termId)]:[];
     const it=arr.find(x=>x.id===target.entryId);if(!it)return false;
-    it.summary=summary.summary;it.aiTitle=summary.title;it.summaryAt=todayStamp();
+    it.articles=summary.articles;it.summary=summary.articles.map(a=>(a.title?a.title+'\n':'')+a.summary).join('\n\n');delete it.aiTitle;it.summaryAt=todayStamp();
     return writeJsonStore(USER_ART_KEY,map);
   }
   const memos=getNewsMemos(),it=memos.find(x=>x.id===target.entryId);
   if(!it)return false;
-  it.summary=summary.summary;it.aiTitle=summary.title;it.summaryAt=todayStamp();
+  it.articles=summary.articles;it.summary=summary.articles.map(a=>(a.title?a.title+'\n':'')+a.summary).join('\n\n');delete it.aiTitle;it.summaryAt=todayStamp();
   return writeJsonStore(NEWS_MEMO_KEY,memos);
 }
 function refreshAfterSummary(target){
@@ -930,9 +933,16 @@ async function runSummary(target,photoIds,fromAuto){
 }
 function renderSummaryBlock(entry,target){
   const wrap=node('div','');
-  if(entry.summary){
+  const list=Array.isArray(entry.articles)&&entry.articles.length?entry.articles:(entry.summary?[{title:'',summary:entry.summary}]:[]);
+  if(list.length){
     const box=node('div','');box.className='aiSummary';
-    box.append(node('small','AI 요약 · 사진을 읽고 만든 요약이라 틀릴 수 있어요'),node('p',entry.summary));
+    box.append(node('small','AI 요약 · 사진을 읽고 만든 요약이라 틀릴 수 있어요'));
+    list.forEach(a=>{
+      const item=node('div','');item.className='aiArt';
+      if(a.title)item.append(node('h5',a.title));
+      item.append(node('p',a.summary));
+      box.append(item);
+    });
     wrap.append(box);
   }
   if(summaryUi.busy.has(entry.id)){
@@ -1058,7 +1068,7 @@ function renderNewsMemos(){
     if(m.date!==lastDate){lastDate=m.date;const dh=node('h3',m.date||'날짜 없음');dh.style.marginTop='24px';list.append(dh)}
     const card=node('div','');card.className='newsCard';
     const head=node('div','');head.className='newsCardHead';
-    head.append(node('h4',m.title||m.aiTitle||'기사 캡처 메모'));
+    head.append(node('h4',m.title||'기사 캡처 메모'));
     const del=button('삭제',()=>{
       if(!confirm('이 기사 메모를 삭제할까요?'))return;
       writeJsonStore(NEWS_MEMO_KEY,getNewsMemos().filter(v=>v.id!==m.id));
