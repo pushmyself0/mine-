@@ -270,6 +270,23 @@ button.photoThumb:hover{border-color:var(--blue)}
 .aiBtn:hover{background:var(--blue-soft)}
 .aiArt{margin-top:12px}.aiArt+.aiArt{border-top:1px dashed var(--blue);padding-top:12px}
 .aiArt h5{margin:0;font-size:15px;line-height:1.5;color:#11183c;font-weight:750}
+.newsArchive{display:grid;grid-template-columns:210px minmax(0,1fr);gap:24px;align-items:start}
+.newsCats{position:sticky;top:16px;display:flex;flex-direction:column;gap:6px}
+.newsCats h3{margin:0 0 4px;font-size:14px;color:var(--muted);font-weight:650}
+.catBtn{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;text-align:left;padding:9px 12px;font-size:14px}
+.catBtn em{font-style:normal;font-size:12.5px;color:var(--muted)}
+.catBtn.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.catBtn.on em{color:#fff}
+.catManage{margin:10px 0 0;padding:10px 12px;font-size:13.5px}
+.catManage summary{color:var(--muted)}
+.catRow{display:flex;align-items:center;gap:6px;margin-top:8px}
+.catRow span{flex:1;min-width:0;overflow-wrap:anywhere}
+.catRow button{padding:3px 8px;font-size:12px}
+.catAdd{display:flex;gap:6px;margin-top:10px}
+.catAdd input{margin:0;padding:6px 8px;font-size:13px}
+.catAdd button{padding:6px 10px;font-size:13px;white-space:nowrap}
+.artMeta .catSel{display:inline-block;width:auto;margin:0;padding:2px 8px;font-size:12.5px;border-radius:999px;color:var(--blue);border-color:var(--blue)}
+@media(max-width:760px){.newsArchive{grid-template-columns:1fr}.newsCats{position:static;flex-direction:row;flex-wrap:wrap}.catBtn{width:auto}.newsCats h3{width:100%}.catManage{width:100%}}
 .aiArt p{margin:4px 0 0;font-size:14.5px;line-height:1.7;color:#11183c;white-space:pre-wrap}
 .aiBusy{font-size:13px;color:var(--blue);margin:6px 0}
 .aiErr{font-size:13px;color:#b42318;margin:6px 0;line-height:1.5}
@@ -418,7 +435,7 @@ button.photoThumb:hover{border-color:var(--blue)}
 </main>
 <main id="newsPage" hidden>
 <h1>신문 요약 및 흐름 형성</h1>
-<p class="intro">매일 읽은 신문 기사 캡처를 올리면 AI가 요약하고, 날짜순으로 쌓아 흐름을 볼 수 있어요.</p>
+<p class="intro">매일 읽은 신문 기사 캡처를 올리면 AI가 요약하고, 분류별·날짜순으로 쌓아 흐름을 볼 수 있어요.</p>
 <section>
     <h2>신문 요약 기록하기</h2>
     <form id="newsMemoForm">
@@ -426,6 +443,7 @@ button.photoThumb:hover{border-color:var(--blue)}
         <label>날짜<input type="date" name="date" required></label>
         <label>매체<input name="source" value="한국경제" maxlength="40" required></label>
       </div>
+      <label>분류<select name="category" id="newsCatSelect"></select></label>
       <label>기사 제목 (사진이 있으면 생략 가능)<input name="title" placeholder="예: 원·달러 환율 1,400원 돌파… 수출기업 희비" maxlength="160"></label>
       <label>기사 링크 (선택)<input type="url" name="url" placeholder="https://www.hankyung.com/..."></label>
       <label class="photoPick">기사 캡처 사진 (선택 · 여러 장 가능)<input type="file" name="photos" accept="image/*" multiple></label>
@@ -441,9 +459,14 @@ button.photoThumb:hover{border-color:var(--blue)}
     </form>
   </section>
   <section>
-    <h2>요약 타임라인</h2>
-    <p id="newsMemoStatus" role="status"></p>
-    <div id="newsMemoList"></div>
+    <h2>요약 보관함</h2>
+    <div class="newsArchive">
+      <aside id="newsCats" class="newsCats" aria-label="분류"></aside>
+      <div class="newsStack">
+        <p id="newsMemoStatus" role="status"></p>
+        <div id="newsMemoList"></div>
+      </div>
+    </div>
   </section>
 </main><main id="fitness" class="journal" hidden><h1>운동 기록</h1><section><h2>오늘은 어떤 운동?</h2><label>운동한 날짜<input type="date" id="sportDate" required></label><div class="sports" id="sportMenu" aria-label="운동 선택"></div><div id="weights" hidden><h2>웨이트 운동 도감</h2><nav id="bodyGroups" aria-label="부위별 운동"></nav><label>종목 검색<input type="search" id="liftFind" placeholder="시티드 로우, 벤치프레스, squat"></label><p id="liftCount"></p><div id="liftGrid"></div><button id="moreLifts" type="button">더 보기</button><article id="liftView" hidden><h3 id="liftName"></h3><div id="poseList"></div></article><small>원자료의 주동근 기준 · 근력·파워리프팅·역도·스트롱맨 종목과 변형 포함<br>동작 사진 및 영문명 · <a href="https://github.com/yuhonas/free-exercise-db">Free Exercise DB</a></small></div><button class="primary" id="sportSave">운동 기록하기</button><p role="status" id="sportStatus"></p><details><summary>내 운동 메뉴 추가</summary><form id="sportAdd" class="addsport"><label>운동 이름<input name="sport" required maxlength="60"></label><button>추가</button></form></details></section><section><h2>운동별 누적 일수</h2><div id="sportChart"></div></section><section><h2>지난 운동</h2><div id="sportHistory"></div></section></main>
 <main id="journal" class="journal" hidden><h1 id="journalTitle"></h1><section><form id="journalForm"></form></section><h2>지난 기록</h2><div id="records"></div><p id="journalStatus" role="status"></p></main>
@@ -1058,11 +1081,85 @@ el('newsTermInput').oninput=()=>{
     b.type='button';box.append(b);
   }
 };
+const NEWS_CAT_KEY='news-categories-v1';
+const DEFAULT_NEWS_CATS=['금융·증시','부동산','산업·기업','국제·무역','정책·재정','물가·경기'];
+let newsCatFilter='all',newsCatManageOpen=false;
+function getNewsCats(){
+  const v=readJsonStore(NEWS_CAT_KEY,null);
+  if(Array.isArray(v))return v.filter(c=>c&&c.id&&typeof c.name==='string'&&c.name);
+  return DEFAULT_NEWS_CATS.map((name,i)=>({id:'c'+(i+1),name}));
+}
+function saveNewsCats(list){return writeJsonStore(NEWS_CAT_KEY,list)}
+function memoCatId(m,cats){return m.categoryId&&cats.some(c=>c.id===m.categoryId)?m.categoryId:''}
+function fillCatSelect(sel,cats,value){
+  sel.replaceChildren();
+  const o0=node('option','미분류');o0.value='';sel.append(o0);
+  for(const c of cats){const o=node('option',c.name);o.value=c.id;sel.append(o)}
+  sel.value=cats.some(c=>c.id===value)?value:'';
+}
+function renderNewsCats(){
+  const box=el('newsCats');box.replaceChildren();
+  const cats=getNewsCats(),memos=getNewsMemos(),counts=new Map();
+  for(const m of memos){const k=memoCatId(m,cats);counts.set(k,(counts.get(k)||0)+1)}
+  if(newsCatFilter!=='all'&&newsCatFilter!==''&&!cats.some(c=>c.id===newsCatFilter))newsCatFilter='all';
+  fillCatSelect(el('newsCatSelect'),cats,el('newsCatSelect').value);
+  box.append(node('h3','분류'));
+  const addBtn=(key,label,n)=>{
+    const b=button('',()=>{newsCatFilter=key;if(key!=='all')el('newsCatSelect').value=key;renderNewsMemos()});
+    b.type='button';b.className='catBtn'+(newsCatFilter===key?' on':'');
+    b.append(node('span',label),node('em',String(n)));
+    box.append(b);
+  };
+  addBtn('all','전체',memos.length);
+  cats.forEach(c=>addBtn(c.id,c.name,counts.get(c.id)||0));
+  addBtn('','미분류',counts.get('')||0);
+  const det=document.createElement('details');det.className='catManage';
+  det.append(node('summary','분류 관리'));
+  cats.forEach(c=>{
+    const row=node('div','');row.className='catRow';
+    row.append(node('span',c.name));
+    const ren=button('이름',()=>{
+      const name=(prompt('새 분류 이름',c.name)||'').trim().slice(0,20);
+      if(!name||name===c.name)return;
+      if(cats.some(x=>x.name===name)){alert('같은 이름의 분류가 이미 있어요.');return}
+      saveNewsCats(cats.map(x=>x.id===c.id?{...x,name}:x));renderNewsMemos();
+    });
+    ren.type='button';
+    const del=button('삭제',()=>{
+      if(!confirm('‘'+c.name+'’ 분류를 삭제할까요? 이 분류의 요약은 지워지지 않고 미분류로 옮겨져요.'))return;
+      const all=getNewsMemos();all.forEach(m=>{if(m.categoryId===c.id)m.categoryId=''});
+      writeJsonStore(NEWS_MEMO_KEY,all);
+      saveNewsCats(cats.filter(x=>x.id!==c.id));
+      if(newsCatFilter===c.id)newsCatFilter='all';
+      renderNewsMemos();
+    });
+    del.type='button';
+    row.append(ren,del);det.append(row);
+  });
+  const form=document.createElement('form');form.className='catAdd';
+  const inp=document.createElement('input');inp.placeholder='새 분류 이름';inp.maxLength=20;inp.setAttribute('aria-label','새 분류 이름');
+  const sub=document.createElement('button');sub.type='submit';sub.textContent='추가';
+  form.append(inp,sub);
+  form.onsubmit=e=>{
+    e.preventDefault();
+    const name=inp.value.trim().slice(0,20);
+    if(!name)return;
+    if(cats.some(x=>x.name===name)){alert('같은 이름의 분류가 이미 있어요.');return}
+    saveNewsCats([...cats,{id:makeId(),name}]);renderNewsMemos();
+  };
+  det.append(form);
+  det.open=newsCatManageOpen;
+  det.ontoggle=()=>{newsCatManageOpen=det.open};
+  box.append(det);
+}
 const newsPicker=makePhotoPicker(el('newsMemoForm'),el('newsMemoForm').elements.photos,el('newsPhotoPreview'));
 function renderNewsMemos(){
   const list=el('newsMemoList');list.replaceChildren();
-  const memos=getNewsMemos().slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  el('newsMemoStatus').textContent=memos.length?'총 '+memos.length+'건의 신문 요약이 쌓였어요.':'아직 기록한 신문 요약이 없어요. 오늘 읽은 기사 캡처부터 올려 보세요.';
+  renderNewsCats();
+  const cats=getNewsCats(),allMemos=getNewsMemos();
+  const memos=allMemos.filter(m=>newsCatFilter==='all'||memoCatId(m,cats)===newsCatFilter).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const catLabel=newsCatFilter==='all'?'':(newsCatFilter===''?'미분류':((cats.find(c=>c.id===newsCatFilter)||{}).name||''));
+  el('newsMemoStatus').textContent=!allMemos.length?'아직 기록한 신문 요약이 없어요. 오늘 읽은 기사 캡처부터 올려 보세요.':(memos.length?(catLabel?'‘'+catLabel+'’ ':'총 ')+memos.length+'건의 신문 요약이 쌓였어요.':'이 분류에는 아직 쌓인 요약이 없어요.');
   let lastDate='';
   for(const m of memos){
     if(m.date!==lastDate){lastDate=m.date;const dh=node('h3',m.date||'날짜 없음');dh.style.marginTop='24px';list.append(dh)}
@@ -1080,6 +1177,10 @@ function renderNewsMemos(){
     card.append(head);
     const meta=node('div','');meta.className='artMeta';
     meta.append(node('span',[m.date,m.source].filter(Boolean).join(' · ')));
+    const cs=document.createElement('select');cs.className='catSel';cs.setAttribute('aria-label','분류');
+    fillCatSelect(cs,cats,m.categoryId);
+    cs.onchange=()=>{const all=getNewsMemos(),t=all.find(x=>x.id===m.id);if(t){t.categoryId=cs.value;writeJsonStore(NEWS_MEMO_KEY,all)}renderNewsMemos()};
+    meta.append(cs);
     const u=safeUrl(m.url);
     if(u){const link=node('a','원문 기사 보기 ↗');link.href=u;link.target='_blank';link.rel='noopener noreferrer';link.className='artLink';meta.append(link)}
     card.append(meta);
@@ -1117,10 +1218,13 @@ el('newsMemoForm').onsubmit=async e=>{
       url:f.url.value.trim(),
       termIds:dictState.newsSelected.map(t=>t.id),
       note,
+      categoryId:f.category.value,
       photoIds
     };
     if(!writeJsonStore(NEWS_MEMO_KEY,[entry,...getNewsMemos()])){await photoDeleteMany(photoIds);throw new Error('store')}
+    const keepCat=f.category.value;
     e.target.reset();
+    f.category.value=keepCat;
     f.date.value=todayStamp();
     f.source.value='한국경제';
     newsPicker.clear();
@@ -1185,7 +1289,7 @@ el('exportArchiveBtn').onclick=async()=>{
   memos.forEach(m=>(m.photoIds||[]).forEach(i=>ids.add(i)));
   const photos={};
   for(const id of ids){try{const b=await photoGet(id);if(b)photos[id]=await blobToDataUrl(b)}catch{}}
-  const payload={exportedAt:new Date().toISOString(),userArticles:arts,newsMemos:memos,mentions:getMentionsMap(),photos};
+  const payload={exportedAt:new Date().toISOString(),userArticles:arts,newsMemos:memos,newsCategories:getNewsCats(),mentions:getMentionsMap(),photos};
   const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=node('a','');a.href=url;a.download='hankyung-archive-'+todayStamp()+'.json';a.click();
@@ -1211,6 +1315,10 @@ el('importArchiveFile').onchange=async e=>{
     if(Array.isArray(data.newsMemos)){
       const cur=getNewsMemos(),seen=new Set(cur.map(x=>x.id));
       writeJsonStore(NEWS_MEMO_KEY,[...cur,...data.newsMemos.filter(x=>x&&!seen.has(x.id))]);
+    }
+    if(Array.isArray(data.newsCategories)){
+      const cur=getNewsCats(),seen=new Set(cur.map(x=>x.id));
+      saveNewsCats([...cur,...data.newsCategories.filter(x=>x&&x.id&&typeof x.name==='string'&&x.name&&!seen.has(x.id))]);
     }
     if(data.mentions&&typeof data.mentions==='object'){
       const cur=getMentionsMap();
