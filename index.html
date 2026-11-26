@@ -537,6 +537,7 @@ button.photoThumb:hover{border-color:var(--blue)}
   <section>
     <h2>오늘의 요약</h2>
     <p id="newsMemoStatus" role="status"></p>
+    <div id="todayPdfBar"></div>
     <div id="newsMemoList"></div>
   </section>
   <section>
@@ -1171,7 +1172,7 @@ function makePhotoPicker(form,input,preview){
   return {files:()=>picked.map(x=>x.file),count:()=>picked.length,clear:()=>{picked.forEach(x=>URL.revokeObjectURL(x.url));picked.length=0;redraw()}};
 }
 const AI_PASS_KEY='ai-summary-pass-v1';
-const summaryUi={busy:new Set(),err:new Map()};
+const summaryUi={busy:new Set(),err:new Map(),prog:new Map()};
 function renderTermArticles(t){
   const arts=el('dictArticles');arts.replaceChildren();
   const userArts=getUserArticles(t.id);
@@ -1217,6 +1218,7 @@ async function requestSummary(photoIds,hint){
   if(res.status===401){sessionStorage.removeItem(AI_PASS_KEY);try{localStorage.removeItem('sync-pass-v1')}catch{}throw new Error('auth')}
   if(res.status===429)throw new Error('quota:'+(data.error||'AI 요약 한도에 도달했어요.'));
   if(res.status===404||res.status===405||res.status===501)throw new Error('noserver');
+  if(res.status===504||res.status===503||res.status===502)throw new Error('timeout:'+(data.error||('오류 '+res.status)));
   if(!res.ok)throw new Error('msg:'+(data.error||('오류 '+res.status)));
   if(!Array.isArray(data.articles)||!data.articles.length)throw new Error('msg:요약 결과가 비어 있어요.');
   sessionStorage.setItem(AI_PASS_KEY,pass);
@@ -1229,6 +1231,7 @@ function summaryErrorText(err){
   if(m==='noserver')return 'AI 요약 서버가 아직 연결되지 않았어요. (배포된 사이트에서만 작동해요)';
   if(m==='network')return '요약 서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.';
   if(m==='nophoto')return '이 브라우저에서 사진을 찾지 못했어요. 백업 파일을 불러온 뒤 다시 시도해 주세요.';
+  if(m.startsWith('timeout:'))return 'AI 서버 응답이 늦어졌어요 ('+m.slice(8)+'). 아래 ‘이어서 요약’ 버튼을 눌러 주세요.';
   if(m.startsWith('msg:'))return m.slice(4);
   return '요약하지 못했어요. 잠시 뒤 다시 시도해 주세요.';
 }
@@ -1243,12 +1246,12 @@ function saveSummary(target,summary){
   if(target.kind==='term'){
     const map=getUserArticlesMap(),arr=Array.isArray(map[String(target.termId)])?map[String(target.termId)]:[];
     const it=arr.find(x=>x.id===target.entryId);if(!it)return false;
-    it.articles=summary.articles;it.summary=summary.articles.map(a=>(a.title?a.title+'\n':'')+a.summary).join('\n\n');delete it.aiTitle;it.summaryAt=todayStamp();
+    it.articles=summary.articles;it.summary=summary.articles.map(a=>(a.title?a.title+'\n':'')+a.summary).join('\n\n');if(typeof summary.done==='number')it.summaryDone=summary.done;delete it.aiTitle;it.summaryAt=todayStamp();
     return writeJsonStore(USER_ART_KEY,map);
   }
   const memos=getNewsMemos(),it=memos.find(x=>x.id===target.entryId);
   if(!it)return false;
-  it.articles=summary.articles;it.summary=summary.articles.map(a=>(a.title?a.title+'\n':'')+a.summary).join('\n\n');delete it.aiTitle;it.summaryAt=todayStamp();
+  it.articles=summary.articles;it.summary=summary.articles.map(a=>(a.title?a.title+'\n':'')+a.summary).join('\n\n');if(typeof summary.done==='number')it.summaryDone=summary.done;delete it.aiTitle;it.summaryAt=todayStamp();
   return writeJsonStore(NEWS_MEMO_KEY,memos);
 }
 function refreshAfterSummary(target){
@@ -1271,7 +1274,7 @@ function askQuotaChoice(message){
     box.showModal();
   });
 }
-const AI_BATCH=4;
+const AI_BATCH=2;
 async function runSummary(target,photoIds,fromAuto,from=0,acc=null){
   const id=target.entryId;
   if(aiStoppedToday()){
@@ -1282,31 +1285,54 @@ async function runSummary(target,photoIds,fromAuto,from=0,acc=null){
   summaryUi.busy.add(id);summaryUi.err.delete(id);refreshAfterSummary(target);
   let articles=acc?acc.slice():[];
   let pos=from;
+  const total=photoIds.length;
+  const hint=hintFor(target);
   try{
-    for(;pos<photoIds.length;pos+=AI_BATCH){
-      const s=await requestSummary(photoIds.slice(pos,pos+AI_BATCH),hintFor(target));
-      articles=articles.concat(s.articles);
-      if(!saveSummary(target,{articles}))throw new Error('msg:요약을 저장하지 못했어요.');
+    while(pos<total){
+      const end=Math.min(pos+AI_BATCH,total);
+      const batch=photoIds.slice(pos,end);
+      summaryUi.prog.set(id,'AI가 사진을 읽고 요약하는 중이에요… ('+(pos+1)+(end>pos+1?'~'+end:'')+' / '+total+'장)');
       refreshAfterSummary(target);
+      try{
+        const s=await requestSummary(batch,hint);
+        articles=articles.concat(s.articles);
+        pos=end;
+        if(!saveSummary(target,{articles,done:pos}))throw new Error('msg:요약을 저장하지 못했어요.');
+        refreshAfterSummary(target);
+      }catch(err){
+        const m=String(err&&err.message||'');
+        if(m.startsWith('timeout:')&&batch.length>1){
+          for(let j=0;j<batch.length;j++){
+            summaryUi.prog.set(id,'응답이 느려 1장씩 요약 중이에요… ('+(pos+1)+' / '+total+'장)');
+            refreshAfterSummary(target);
+            await new Promise(r=>setTimeout(r,1200));
+            const s=await requestSummary([batch[j]],hint);
+            articles=articles.concat(s.articles);
+            pos++;
+            if(!saveSummary(target,{articles,done:pos}))throw new Error('msg:요약을 저장하지 못했어요.');
+            refreshAfterSummary(target);
+          }
+        }else throw err;
+      }
     }
   }catch(err){
     const m=String(err&&err.message||'');
     if(m.startsWith('quota:')){
-      summaryUi.busy.delete(id);refreshAfterSummary(target);
+      summaryUi.busy.delete(id);summaryUi.prog.delete(id);refreshAfterSummary(target);
       const choice=await askQuotaChoice(m.slice(6));
       if(choice==='retry'){summaryUi.busy.delete(id);return await runSummary(target,photoIds,fromAuto,pos,articles)}
       stopAiToday();
       summaryUi.err.set(id,'오늘은 AI 요약을 멈췄어요. 내일 다시 요약할 수 있어요. 사진은 그대로 있어요.');
     }else summaryUi.err.set(id,summaryErrorText(err));
   }
-  finally{summaryUi.busy.delete(id);refreshAfterSummary(target)}
+  finally{summaryUi.busy.delete(id);summaryUi.prog.delete(id);refreshAfterSummary(target)}
 }
 function renderSummaryBlock(entry,target){
   const wrap=node('div','');
   const list=Array.isArray(entry.articles)&&entry.articles.length?entry.articles:(entry.summary?[{title:'',summary:entry.summary}]:[]);
   if(list.length){
     const box=node('div','');box.className='aiSummary';
-    box.append(node('small','AI 요약 · 사진을 읽고 만든 요약이라 틀릴 수 있어요'));
+    box.append(node('small','AI 요약 · 기사 '+list.length+'건 (흐름 형성 로우 데이터로 자동 연결돼요)'));
     list.forEach(a=>{
       const item=node('div','');item.className='aiArt';
       if(a.title)item.append(node('h5',a.title));
@@ -1316,10 +1342,16 @@ function renderSummaryBlock(entry,target){
     wrap.append(box);
   }
   if(summaryUi.busy.has(entry.id)){
-    const b=node('p','AI가 사진을 읽고 요약하는 중이에요…');b.className='aiBusy';wrap.append(b);
+    const b=node('p',summaryUi.prog.get(entry.id)||'AI가 사진을 읽고 요약하는 중이에요…');b.className='aiBusy';wrap.append(b);
   }else{
-    const btn=button(entry.summary?'다시 요약':'AI로 요약하기',()=>runSummary(target,entry.photoIds));
-    btn.type='button';btn.className='aiBtn';wrap.append(btn);
+    const total=(entry.photoIds||[]).length;
+    const done=typeof entry.summaryDone==='number'?entry.summaryDone:(entry.summary?total:0);
+    if(done>0&&done<total){
+      const cont=button('이어서 요약하기 ('+(total-done)+'장 남음)',()=>runSummary(target,entry.photoIds,false,done,list));
+      cont.type='button';cont.className='aiBtn';wrap.append(cont);
+    }
+    const btn=button(entry.summary?'처음부터 다시 요약':'AI로 요약하기',()=>runSummary(target,entry.photoIds,false,0,null));
+    btn.type='button';btn.className='aiBtn';if(done>0&&done<total)btn.style.marginLeft='8px';wrap.append(btn);
     const err=summaryUi.err.get(entry.id);
     if(err){const e=node('p',err);e.className='aiErr';wrap.append(e)}
   }
@@ -1566,6 +1598,9 @@ function renderRecentMemos(memos){
     let count=0;list.forEach(m=>{count+=Math.max(1,memoArticles(m).length)});
     const sources=[...new Set(list.map(m=>m.source).filter(Boolean))].join(', ');
     det.append(node('summary',date+' · 기사 '+count+'건'+(sources?' · '+sources:'')));
+    const pdfBtn=button('PDF 받기 ('+safeFileName(sources||'신문')+'_'+date+'.pdf)',()=>exportDayPdf(sources||'신문',date,list,pdfBtn));
+    pdfBtn.type='button';pdfBtn.style.marginTop='10px';pdfBtn.style.fontSize='13px';
+    det.append(pdfBtn);
     list.forEach(m=>{
       const item=node('div','');item.className='dayItem';
       const arts=memoArticles(m);
@@ -1759,6 +1794,24 @@ function renderNewsMemos(){
   const flowDates=all.map(m=>m.date).filter(Boolean).sort();
   el('flowInfo').textContent=all.length?'지금까지 '+all.length+'건의 요약이 쌓여 있어요'+(flowDates.length?' ('+flowDates[0]+' ~ '+flowDates[flowDates.length-1]+')':'')+'.':'아직 쌓인 요약이 없어요. 먼저 요약을 기록해 주세요.';
   const list=el('newsMemoList');list.replaceChildren();
+  const pdfBar=el('todayPdfBar');if(pdfBar){
+    pdfBar.replaceChildren();
+    const groups=new Map();
+    today.forEach(m=>{
+      if(!memoArticles(m).length)return;
+      const date=m.date||todayStamp(),source=m.source||'신문',k=date+'|'+source;
+      if(!groups.has(k))groups.set(k,{date,source,list:[]});
+      groups.get(k).list.push(m);
+    });
+    for(const g of groups.values()){
+      let count=0;g.list.forEach(m=>{count+=Math.max(1,memoArticles(m).length)});
+      const row=node('div','');row.className='fileRow';
+      const name=node('span',safeFileName(g.source)+'_'+g.date+'.pdf');name.className='fname';
+      row.append(name,node('small','기사 '+count+'건'));
+      const b=button('PDF 받기',()=>exportDayPdf(g.source,g.date,g.list,b));b.type='button';b.className='primary';
+      row.append(b);pdfBar.append(row);
+    }
+  }
   today.forEach(m=>list.append(newsCard(m)));
   renderRecentMemos(recent);
   renderNewsFiles(old);
