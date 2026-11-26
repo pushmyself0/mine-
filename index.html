@@ -854,7 +854,7 @@ async function requestSummary(photoIds,hint){
   if(!res.ok)throw new Error('msg:'+(data.error||('오류 '+res.status)));
   if(!data.summary)throw new Error('msg:요약 결과가 비어 있어요.');
   sessionStorage.setItem(AI_PASS_KEY,pass);
-  return String(data.summary);
+  return {title:String(data.title||''),summary:String(data.summary)};
 }
 function summaryErrorText(err){
   const m=String(err&&err.message||'');
@@ -877,12 +877,12 @@ function saveSummary(target,summary){
   if(target.kind==='term'){
     const map=getUserArticlesMap(),arr=Array.isArray(map[String(target.termId)])?map[String(target.termId)]:[];
     const it=arr.find(x=>x.id===target.entryId);if(!it)return false;
-    it.summary=summary;it.summaryAt=todayStamp();
+    it.summary=summary.summary;it.aiTitle=summary.title;it.summaryAt=todayStamp();
     return writeJsonStore(USER_ART_KEY,map);
   }
   const memos=getNewsMemos(),it=memos.find(x=>x.id===target.entryId);
   if(!it)return false;
-  it.summary=summary;it.summaryAt=todayStamp();
+  it.summary=summary.summary;it.aiTitle=summary.title;it.summaryAt=todayStamp();
   return writeJsonStore(NEWS_MEMO_KEY,memos);
 }
 function refreshAfterSummary(target){
@@ -1058,7 +1058,7 @@ function renderNewsMemos(){
     if(m.date!==lastDate){lastDate=m.date;const dh=node('h3',m.date||'날짜 없음');dh.style.marginTop='24px';list.append(dh)}
     const card=node('div','');card.className='newsCard';
     const head=node('div','');head.className='newsCardHead';
-    head.append(node('h4',m.title||'기사 캡처 메모'));
+    head.append(node('h4',m.title||m.aiTitle||'기사 캡처 메모'));
     const del=button('삭제',()=>{
       if(!confirm('이 기사 메모를 삭제할까요?'))return;
       writeJsonStore(NEWS_MEMO_KEY,getNewsMemos().filter(v=>v.id!==m.id));
