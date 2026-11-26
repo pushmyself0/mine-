@@ -206,6 +206,30 @@ dialog::backdrop{background:rgba(16,16,20,.45)}
 .stepNav{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:4px 0 16px}
 .stepNav button{font-weight:600;color:var(--blue);border-color:var(--blue)}
 .stepNav button:hover{background:var(--blue-soft)}
+.dayFile{margin:0 0 10px;padding:12px 16px}
+.dayFile summary{font-weight:650;font-size:14.5px}
+.dayItem{border-top:1px solid var(--line);padding:10px 0 4px;margin-top:10px}
+.dayItem h5{margin:0 0 2px;font-size:14.5px;line-height:1.5}
+.dayItem p{margin:2px 0 8px;font-size:14px;line-height:1.65;color:#2a2a2a;white-space:pre-wrap}
+.dayItem .dayMeta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.dayItem .dayMeta button{padding:2px 8px;font-size:12px}
+.fileRow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.fileRow .fname{flex:1;min-width:160px;font-weight:600;overflow-wrap:anywhere}
+.fileRow small{color:var(--muted)}
+.fileRow button{padding:5px 12px;font-size:13px}
+.flowMine{margin:12px 0}
+.flowMine summary{font-weight:650}
+.flowMine textarea{min-height:56px;width:100%}
+.flowCard{border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0;background:#fff}
+.flowCard h4{margin:0 0 4px;font-size:17px}
+.flowRefs{font-size:12.5px;color:var(--muted);line-height:1.6;margin:0 0 4px}
+.flowSteps{margin:0}
+.flowSteps dt{font-weight:700;font-size:13.5px;color:var(--blue);margin-top:14px}
+.flowSteps dd{margin:2px 0 0;font-size:14.5px;line-height:1.7;white-space:pre-wrap}
+.flowMineBox{background:#fafaf8;border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:10px 0}
+.flowMineBox dt{font-weight:650;font-size:13px;color:var(--muted);margin-top:8px}
+.flowMineBox dd{margin:2px 0 0;font-size:14px;white-space:pre-wrap}
+.flowMeta{font-size:13px;color:var(--muted);margin:0 0 6px}
 .termHeadRow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
 .termHeadRow h2{margin:0}
 .termActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -453,17 +477,58 @@ button.photoThumb:hover{border-color:var(--blue)}
 </div>
 <div id="newsTabLine" hidden>
   <section>
-    <h2>요약 타임라인</h2>
+    <h2>오늘의 요약</h2>
     <p id="newsMemoStatus" role="status"></p>
     <div id="newsMemoList"></div>
+  </section>
+  <section>
+    <h2>최근 3일 정리본</h2>
+    <p class="formNotice">하루 전~3일 전 기록은 날짜별로 접어서 정리해요. 날짜를 누르면 펼쳐져요.</p>
+    <div id="newsRecentList"></div>
+  </section>
+  <section>
+    <h2>3일 지난 기록 (PDF 파일)</h2>
+    <p class="formNotice">3일이 지난 기록은 날짜별 PDF 파일로 정리돼요. 파일 이름은 ‘매체_날짜.pdf’예요.</p>
+    <div id="newsFileList"></div>
   </section>
   <div class="stepNav"><button type="button" id="newsPrevToWrite">← 1. 기사 입력</button><button type="button" id="newsNextToFlow">다음: 3. 흐름 형성 →</button></div>
 </div>
 <div id="newsTabFlow" hidden>
   <section>
-    <h2>흐름 형성</h2>
-    <p class="intro">쌓인 요약들을 이어서 한눈에 흐름으로 보는 곳이에요. 흐름을 만드는 기준(알고리즘)이 정해지면 여기에 채울 거예요.</p>
+    <h2>흐름 형성 · 통찰력 체크리스트로 분석</h2>
+    <p class="intro">쌓인 요약을 서로 연결해서 ① 무엇이 달라졌나 → ② 왜 이어지나 → ③ 누가 움직이나 → ④ 무엇이 막고 있나 → ⑤ 어디까지 영향을 주나 → ⑥ 무엇이면 틀리나, 이 순서로 분석해요.</p>
     <p id="flowInfo" role="status"></p>
+    <form id="flowForm">
+      <label>분석할 범위
+        <select id="flowRange" name="range">
+          <option value="today">오늘</option>
+          <option value="3" selected>최근 3일</option>
+          <option value="7">최근 7일</option>
+          <option value="30">최근 30일</option>
+          <option value="all">전체</option>
+        </select>
+      </label>
+      <p id="flowCount" class="formNotice"></p>
+      <details class="flowMine" open>
+        <summary>먼저 내 5줄 써 보기 (AI 결과를 보기 전에 쓰면 연습이 돼요)</summary>
+        <label>출발 사실 — 무엇이 달라졌나?<textarea name="mine0" rows="2" maxlength="600"></textarea></label>
+        <label>연결 원리 — 왜 다음 변화가 생기나?<textarea name="mine1" rows="2" maxlength="600"></textarea></label>
+        <label>핵심 제약 — 무엇이 선택을 제한하나?<textarea name="mine2" rows="2" maxlength="600"></textarea></label>
+        <label>내 예상 — 누가, 언제, 어떻게 행동할까?<textarea name="mine3" rows="2" maxlength="600"></textarea></label>
+        <label>반증 조건 — 무엇이 확인되면 생각을 수정할까?<textarea name="mine4" rows="2" maxlength="600"></textarea></label>
+      </details>
+      <button type="submit" id="flowRun">AI로 흐름 분석하기</button>
+      <p id="flowStatus" role="status" class="formNotice"></p>
+      <small class="formNotice">분석에는 사진이 아니라 내가 쌓은 요약 글만 Google Gemini로 보내요. AI가 요약만 보고 한 추론이라 틀릴 수 있고, 투자 판단에 쓰면 안 돼요.</small>
+    </form>
+  </section>
+  <section>
+    <h2>분석 결과</h2>
+    <div id="flowResult"></div>
+  </section>
+  <section>
+    <h2>지난 분석</h2>
+    <div id="flowHistory"></div>
   </section>
   <div class="stepNav"><button type="button" id="newsPrevToLine">← 2. 요약</button><span></span></div>
 </div>
@@ -643,6 +708,7 @@ el('tabBtnFreq').onclick=()=>setDictTab('freq');
 let newsTab='write';
 function setNewsTab(tab){
   newsTab=tab;
+  if(tab==='flow')renderFlow();
   [['write','Write'],['line','Line'],['flow','Flow']].forEach(([k,n])=>{
     el('newsTab'+n).hidden=tab!==k;
     el('newsTabBtn'+n).setAttribute('aria-selected',tab===k);
@@ -659,7 +725,7 @@ el('newsPrevToLine').onclick=goNewsTab('line');
 function openNewsPage(){
   const f=el('newsMemoForm');
   if(f&&!f.elements.date.value)f.elements.date.value=todayStamp();
-  renderNewsMemos();
+  renderNewsMemos();renderFlow();
   if(!dictState.terms)dictLoad().then(()=>renderNewsMemos()).catch(()=>{});
 }
 
@@ -1104,48 +1170,340 @@ el('newsTermInput').oninput=()=>{
   }
 };
 const newsPicker=makePhotoPicker(el('newsMemoForm'),el('newsMemoForm').elements.photos,el('newsPhotoPreview'));
-function renderNewsMemos(){
-  const list=el('newsMemoList');list.replaceChildren();
-  const memos=getNewsMemos().slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  el('newsMemoStatus').textContent=memos.length?'총 '+memos.length+'건의 신문 요약이 쌓였어요.':'아직 기록한 신문 요약이 없어요. 오늘 읽은 기사 캡처부터 올려 보세요.';
-  el('newsTabBtnLine').textContent=memos.length?'2. 요약 ('+memos.length+')':'2. 요약';
-  const flowDates=memos.map(m=>m.date).filter(Boolean).sort();
-  el('flowInfo').textContent=memos.length?'지금까지 '+memos.length+'건의 요약이 쌓여 있어요'+(flowDates.length?' ('+flowDates[0]+' ~ '+flowDates[flowDates.length-1]+')':'')+'.':'아직 쌓인 요약이 없어요. 먼저 요약을 기록해 주세요.';
-  let lastDate='';
-  for(const m of memos){
-    if(m.date!==lastDate){lastDate=m.date;const dh=node('h3',m.date||'날짜 없음');dh.style.marginTop='24px';list.append(dh)}
-    const card=node('div','');card.className='newsCard';
-    const head=node('div','');head.className='newsCardHead';
-    head.append(node('h4',m.title||'기사 캡처 메모'));
-    const del=button('삭제',()=>{
-      if(!confirm('이 기사 메모를 삭제할까요?'))return;
-      writeJsonStore(NEWS_MEMO_KEY,getNewsMemos().filter(v=>v.id!==m.id));
-      photoDeleteMany(m.photoIds);
-      renderNewsMemos();
-    });
-    del.type='button';del.className='artDel';
-    head.append(del);
-    card.append(head);
-    const meta=node('div','');meta.className='artMeta';
-    meta.append(node('span',[m.date,m.source].filter(Boolean).join(' · ')));
-    const u=safeUrl(m.url);
-    if(u){const link=node('a','원문 기사 보기 ↗');link.href=u;link.target='_blank';link.rel='noopener noreferrer';link.className='artLink';meta.append(link)}
-    card.append(meta);
-    if(Array.isArray(m.photoIds)&&m.photoIds.length){card.append(renderPhotoStrip(m.photoIds));card.append(renderSummaryBlock(m,{kind:'memo',entryId:m.id}))}
-    if(Array.isArray(m.termIds)&&m.termIds.length){
-      const chips=node('div','');chips.className='chipWrap';
-      for(const id of m.termIds){
-        const term=dictState.byId.get(Number(id));
-        const label=term?term.term:('용어 #'+id);
-        const c=button(label,()=>{if(term){location.hash='dictionary';setTimeout(()=>dictOpen(term),0)}});
-        c.type='button';c.className='termChip clickable';
-        chips.append(c);
-      }
-      card.append(chips);
+const FLOW_KEY='flow-analyses-v1';
+const FLOW_RANGE_LABEL={today:'오늘','3':'최근 3일','7':'최근 7일','30':'최근 30일',all:'전체'};
+const FLOW_RANGE_LIMIT={today:0,'3':3,'7':7,'30':30,all:Infinity};
+const FLOW_STEPS=[['start','① 출발 사실 — 무엇이 달라졌나'],['link','② 연결 원리 — 왜 다음 변화로 이어지나'],['stakeholders','③ 이해관계 — 누가 행동을 바꾸나'],['constraint','④ 핵심 제약 — 무엇이 막고 있나'],['outlook','⑤ 결과 예상 — 언제, 어디까지 영향을 주나'],['falsify','⑥ 반증 조건 — 무엇이면 내 생각이 틀리나'],['watch','확인할 것 — 지표와 다시 볼 시점']];
+const FLOW_MINE=['출발 사실','연결 원리','핵심 제약','내 예상','반증 조건'];
+let flowViewId='',filesShown=12;
+const recentOpen=new Set();
+
+function daysAgo(ds){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(ds||''))return 1;
+  const a=new Date(ds+'T00:00:00'),b=new Date(todayStamp()+'T00:00:00');
+  return Math.round((b-a)/86400000);
+}
+function memoArticles(m){
+  if(Array.isArray(m.articles)&&m.articles.length)return m.articles.filter(a=>a&&a.summary).map(a=>({title:a.title||'',summary:a.summary}));
+  if(m.summary)return [{title:m.title||m.aiTitle||'',summary:m.summary}];
+  if(m.note)return [{title:m.title||'기사 메모',summary:m.note}];
+  return m.title?[{title:m.title,summary:''}]:[];
+}
+function noteIsSeparate(m){return !!(m.note&&((Array.isArray(m.articles)&&m.articles.length)||m.summary))}
+function deleteNewsMemo(m){
+  if(!confirm('이 기사 메모를 삭제할까요?'))return;
+  writeJsonStore(NEWS_MEMO_KEY,getNewsMemos().filter(v=>v.id!==m.id));
+  photoDeleteMany(m.photoIds);
+  renderNewsMemos();
+}
+function safeFileName(s){return String(s||'신문').replace(/[\\/:*?"<>|]/g,'_').trim()||'신문'}
+function downloadBlob(blob,name){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+}
+
+/* ---------- PDF (image pages, no external library) ---------- */
+const PDF_W=1240,PDF_H=1754,PDF_M=96;
+const PDF_FONT="'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Pretendard',sans-serif";
+function wrapLines(ctx,text,maxW){
+  const lines=[];
+  for(const para of String(text||'').split('\n')){
+    let cur='';
+    for(const ch of para){
+      const t=cur+ch;
+      if(cur&&ctx.measureText(t).width>maxW){lines.push(cur);cur=ch}else cur=t;
     }
-    if(m.note){const note=node('p',m.note);note.className='newsNote';card.append(note)}
-    list.append(card);
+    lines.push(cur);
   }
+  return lines;
+}
+function makePdf(imgs){
+  const enc=new TextEncoder(),chunks=[],offs=[];let size=0;
+  const add=d=>{const b=typeof d==='string'?enc.encode(d):d;chunks.push(b);size+=b.length};
+  const n=imgs.length,PW=595.28,PH=841.89;
+  add('%PDF-1.4\n');
+  const kids=[];for(let i=0;i<n;i++)kids.push((3+i*3)+' 0 R');
+  offs[1]=size;add('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+  offs[2]=size;add('2 0 obj\n<< /Type /Pages /Kids ['+kids.join(' ')+'] /Count '+n+' >>\nendobj\n');
+  imgs.forEach((im,i)=>{
+    const pid=3+i*3,cid=pid+1,iid=pid+2;
+    offs[pid]=size;add(pid+' 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+PW+' '+PH+'] /Resources << /XObject << /Im0 '+iid+' 0 R >> >> /Contents '+cid+' 0 R >>\nendobj\n');
+    const content='q '+PW+' 0 0 '+PH+' 0 0 cm /Im0 Do Q';
+    offs[cid]=size;add(cid+' 0 obj\n<< /Length '+content.length+' >>\nstream\n'+content+'\nendstream\nendobj\n');
+    offs[iid]=size;add(iid+' 0 obj\n<< /Type /XObject /Subtype /Image /Width '+im.w+' /Height '+im.h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+im.data.length+' >>\nstream\n');
+    add(im.data);add('\nendstream\nendobj\n');
+  });
+  const total=2+n*3,xref=size;
+  let x='xref\n0 '+(total+1)+'\n0000000000 65535 f \n';
+  for(let i=1;i<=total;i++)x+=String(offs[i]).padStart(10,'0')+' 00000 n \n';
+  add(x+'trailer\n<< /Size '+(total+1)+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF\n');
+  return new Blob(chunks,{type:'application/pdf'});
+}
+async function buildDayPdf(source,date,memos){
+  const pages=[];let cv,ctx,y=0;
+  const newPage=()=>{
+    cv=document.createElement('canvas');cv.width=PDF_W;cv.height=PDF_H;
+    ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,PDF_W,PDF_H);ctx.textBaseline='top';
+    y=PDF_M;pages.push(cv);
+  };
+  const write=(text,size,weight,color,gap)=>{
+    const lh=Math.round(size*1.55),font=weight+' '+size+'px '+PDF_FONT;
+    ctx.font=font;
+    for(const line of wrapLines(ctx,text,PDF_W-PDF_M*2)){
+      if(y+lh>PDF_H-PDF_M){newPage();ctx.font=font}
+      ctx.fillStyle=color;ctx.fillText(line,PDF_M,y);y+=lh;
+    }
+    y+=gap||0;
+  };
+  newPage();
+  const sorted=memos.slice().reverse();
+  let count=0;sorted.forEach(m=>{count+=Math.max(1,memoArticles(m).length)});
+  write(source+' '+date,46,'700','#161616',4);
+  write('신문 요약 · 기사 '+count+'건',24,'400','#6d6d69',28);
+  for(const m of sorted){
+    const arts=memoArticles(m);
+    if(!arts.length)arts.push({title:'기사 캡처',summary:'(요약 없음)'});
+    arts.forEach(a=>{
+      if(a.title)write(a.title,30,'700','#11183c',4);
+      if(a.summary)write(a.summary,26,'400','#222222',14);
+    });
+    const u=safeUrl(m.url);
+    if(u)write('원문: '+u,20,'400','#6d6d69',4);
+    const names=(m.termIds||[]).map(id=>{const t=dictState.byId&&dictState.byId.get(Number(id));return t?t.term:''}).filter(Boolean);
+    if(names.length)write('관련 용어: '+names.join(', '),22,'400','#1a2fd6',4);
+    if(noteIsSeparate(m))write('내 해석: '+m.note,24,'400','#333333',4);
+    if(y+30<PDF_H-PDF_M){ctx.strokeStyle='#e3e3de';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(PDF_M,y+10);ctx.lineTo(PDF_W-PDF_M,y+10);ctx.stroke()}
+    y+=34;
+  }
+  pages.forEach((c,i)=>{
+    const g=c.getContext('2d');g.font='400 20px '+PDF_FONT;g.fillStyle='#9b9b94';g.textBaseline='top';g.textAlign='right';
+    g.fillText('나의영역 · '+source+' '+date+' · '+(i+1)+'/'+pages.length,PDF_W-PDF_M,PDF_H-PDF_M+20);
+  });
+  const imgs=[];
+  for(const c of pages){
+    const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.85));
+    imgs.push({data:new Uint8Array(await blob.arrayBuffer()),w:c.width,h:c.height});
+  }
+  return makePdf(imgs);
+}
+async function exportDayPdf(source,date,memos,btn){
+  const label=btn.textContent;btn.disabled=true;btn.textContent='만드는 중…';
+  try{
+    if(!dictState.terms)await dictLoad().catch(()=>{});
+    downloadBlob(await buildDayPdf(source,date,memos),safeFileName(source)+'_'+date+'.pdf');
+  }catch{alert('PDF를 만들지 못했어요. 잠시 뒤 다시 시도해 주세요.')}
+  finally{btn.disabled=false;btn.textContent=label}
+}
+
+/* ---------- summary tab: recent (<=3 days) and files (>3 days) ---------- */
+function renderRecentMemos(memos){
+  const box=el('newsRecentList');box.replaceChildren();
+  if(!memos.length){const p=node('p','하루 전~3일 전에 쌓인 요약이 없어요.');p.className='formNotice';box.append(p);return}
+  const byDate=new Map();
+  memos.forEach(m=>{const k=m.date||'날짜 없음';if(!byDate.has(k))byDate.set(k,[]);byDate.get(k).push(m)});
+  for(const [date,list] of byDate){
+    const det=document.createElement('details');det.className='dayFile';
+    let count=0;list.forEach(m=>{count+=Math.max(1,memoArticles(m).length)});
+    const sources=[...new Set(list.map(m=>m.source).filter(Boolean))].join(', ');
+    det.append(node('summary',date+' · 기사 '+count+'건'+(sources?' · '+sources:'')));
+    list.forEach(m=>{
+      const item=node('div','');item.className='dayItem';
+      const arts=memoArticles(m);
+      arts.forEach(a=>{if(a.title)item.append(node('h5',a.title));if(a.summary)item.append(node('p',a.summary))});
+      if(!arts.length)item.append(node('p','(요약 없음)'));
+      if(noteIsSeparate(m))item.append(node('p','내 해석: '+m.note));
+      const meta=node('div','');meta.className='dayMeta';
+      if(Array.isArray(m.photoIds)&&m.photoIds.length)meta.append(node('span','캡처 '+m.photoIds.length+'장'));
+      const u=safeUrl(m.url);
+      if(u){const link=node('a','원문 보기 ↗');link.href=u;link.target='_blank';link.rel='noopener noreferrer';link.className='artLink';meta.append(link)}
+      const del=button('삭제',()=>deleteNewsMemo(m));del.type='button';del.className='artDel';meta.append(del);
+      item.append(meta);det.append(item);
+    });
+    det.open=recentOpen.has(date);
+    det.ontoggle=()=>{det.open?recentOpen.add(date):recentOpen.delete(date)};
+    box.append(det);
+  }
+}
+function renderNewsFiles(memos){
+  const box=el('newsFileList');box.replaceChildren();
+  if(!memos.length){const p=node('p','3일이 지난 기록은 아직 없어요. 3일이 지나면 날짜별 PDF 파일로 여기에 정리돼요.');p.className='formNotice';box.append(p);return}
+  const groups=new Map();
+  memos.forEach(m=>{const date=m.date||'날짜없음',source=m.source||'신문',k=date+'|'+source;if(!groups.has(k))groups.set(k,{date,source,list:[]});groups.get(k).list.push(m)});
+  const rows=[...groups.values()].sort((a,b)=>b.date.localeCompare(a.date)||a.source.localeCompare(b.source));
+  rows.slice(0,filesShown).forEach(g=>{
+    let count=0;g.list.forEach(m=>{count+=Math.max(1,memoArticles(m).length)});
+    const row=node('div','');row.className='fileRow';
+    const name=node('span',safeFileName(g.source)+'_'+g.date+'.pdf');name.className='fname';
+    row.append(name,node('small','기사 '+count+'건'));
+    const b=button('PDF 받기',()=>exportDayPdf(g.source,g.date,g.list,b));b.type='button';
+    row.append(b);box.append(row);
+  });
+  if(rows.length>filesShown){
+    const more=button('더 보기 ('+(rows.length-filesShown)+'개 더)',()=>{filesShown+=12;renderNewsMemos()});
+    more.type='button';box.append(more);
+  }
+}
+
+/* ---------- flow tab: insight-checklist analysis ---------- */
+function readFlow(){const v=readJsonStore(FLOW_KEY,[]);return Array.isArray(v)?v:[]}
+function writeFlow(list){return writeJsonStore(FLOW_KEY,list.slice(0,30))}
+function flowItemsAll(range){
+  const lim=FLOW_RANGE_LIMIT[range];const limit=lim===undefined?3:lim;
+  const list=[];
+  getNewsMemos().slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).forEach(m=>{
+    if(daysAgo(m.date)>limit)return;
+    memoArticles(m).forEach(a=>{if(a.summary)list.push({date:m.date||'',title:a.title,summary:a.summary})});
+  });
+  return list;
+}
+function renderFlowCount(){
+  const sel=el('flowRange');if(!sel)return;
+  const n=flowItemsAll(sel.value).length;
+  el('flowCount').textContent=n?'분석 대상: 요약이 있는 기사 '+n+'건'+(n>20?' (가장 최근 20건까지만 분석해요)':''):'이 범위에는 요약이 있는 기사가 아직 없어요.';
+}
+async function requestAnalysis(items){
+  let pass=sessionStorage.getItem(AI_PASS_KEY)||'';
+  if(!pass){
+    pass=(window.prompt('AI 요약 암호를 입력해 주세요. (Vercel에 설정한 APP_PASSCODE)')||'').trim();
+    if(!pass)throw new Error('cancel');
+  }
+  let res;
+  try{
+    res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({passcode:pass,items})});
+  }catch{throw new Error('network')}
+  let data={};try{data=await res.json()}catch{}
+  if(res.status===401){sessionStorage.removeItem(AI_PASS_KEY);throw new Error('auth')}
+  if(res.status===429)throw new Error('quota:'+(data.error||'AI 사용량 한도에 도달했어요.'));
+  if(res.status===404||res.status===405||res.status===501)throw new Error('noserver');
+  if(!res.ok)throw new Error('msg:'+(data.error||('오류 '+res.status)));
+  if(!Array.isArray(data.flows)||!data.flows.length)throw new Error('msg:분석 결과가 비어 있어요.');
+  sessionStorage.setItem(AI_PASS_KEY,pass);
+  return data;
+}
+async function startFlow(){
+  const status=el('flowStatus'),btn=el('flowRun'),f=el('flowForm');
+  if(aiStoppedToday()){status.textContent='오늘은 AI 사용을 멈췄어요. 내일 다시 분석할 수 있어요.';return}
+  const range=el('flowRange').value;
+  const items=flowItemsAll(range).slice(-20);
+  if(!items.length){status.textContent='이 범위에는 요약이 있는 기사가 없어요. 먼저 기사를 입력하고 요약해 주세요.';return}
+  const mine=FLOW_MINE.map((_,i)=>(f.elements['mine'+i].value||'').trim());
+  btn.disabled=true;status.textContent='AI가 흐름을 분석하는 중이에요… (10~40초 걸려요)';
+  try{
+    const data=await requestAnalysis(items);
+    const rec={id:makeId(),createdAt:new Date().toISOString(),range,items:items.map(i=>({date:i.date,title:i.title})),mine,flows:data.flows,gaps:''};
+    if(!writeFlow([rec,...readFlow()]))throw new Error('msg:분석 결과를 저장하지 못했어요.');
+    flowViewId=rec.id;status.textContent='';
+    FLOW_MINE.forEach((_,i)=>{f.elements['mine'+i].value=''});
+    renderFlow();
+  }catch(err){
+    const m=String(err&&err.message||'');
+    if(m.startsWith('quota:')){
+      btn.disabled=false;status.textContent='';
+      const choice=await askQuotaChoice(m.slice(6));
+      if(choice==='retry')return await startFlow();
+      stopAiToday();
+      status.textContent='오늘은 AI 사용을 멈췄어요. 내일 다시 분석할 수 있어요.';
+    }else status.textContent=summaryErrorText(err);
+  }finally{btn.disabled=false}
+}
+function renderFlowRecord(r){
+  const wrap=node('div','');
+  const fmt=localDate(r.createdAt);
+  wrap.append(node('p',fmt+' 분석 · '+(FLOW_RANGE_LABEL[r.range]||'')+' · 기사 '+(r.items?r.items.length:0)+'건'));
+  wrap.lastChild.className='flowMeta';
+  const mine=Array.isArray(r.mine)?r.mine:[];
+  if(mine.some(Boolean)){
+    const box=node('div','');box.className='flowMineBox';
+    box.append(node('strong','내가 먼저 쓴 5줄'));
+    const dl=document.createElement('dl');dl.style.margin='0';
+    FLOW_MINE.forEach((label,i)=>{if(mine[i]){dl.append(node('dt',label),node('dd',mine[i]))}});
+    box.append(dl);wrap.append(box);
+  }
+  (r.flows||[]).forEach(fl=>{
+    const card=node('div','');card.className='flowCard';
+    card.append(node('h4',fl.title||'흐름'));
+    const refs=(fl.articles||[]).map(n=>{const it=r.items&&r.items[n-1];return it?'['+n+'] '+(it.date?it.date+' ':'')+(it.title||'(제목 없음)'):''}).filter(Boolean);
+    if(refs.length){const rp=node('p','연결된 기사: '+refs.join(' · '));rp.className='flowRefs';card.append(rp)}
+    const dl=document.createElement('dl');dl.className='flowSteps';
+    FLOW_STEPS.forEach(([k,label])=>{if(fl[k]){dl.append(node('dt',label),node('dd',fl[k]))}});
+    card.append(dl);wrap.append(card);
+  });
+  const lab=document.createElement('label');
+  lab.append('AI 분석과 비교해 보기 — 몰랐던 정보 / 알았지만 연결하지 못한 부분');
+  const ta=document.createElement('textarea');ta.rows=4;ta.maxLength=2000;ta.value=r.gaps||'';
+  ta.onchange=()=>{const all=readFlow(),t=all.find(x=>x.id===r.id);if(t){t.gaps=ta.value;writeFlow(all)}};
+  lab.append(ta);wrap.append(lab);
+  const note=node('small','AI가 요약만 보고 한 추론이라 틀릴 수 있어요. 투자 판단에 쓰지 마세요.');note.className='formNotice';wrap.append(note);
+  return wrap;
+}
+function renderFlow(){
+  renderFlowCount();
+  const recs=readFlow(),box=el('flowResult'),hist=el('flowHistory');
+  box.replaceChildren();hist.replaceChildren();
+  if(!recs.length){
+    const p=node('p','아직 분석 결과가 없어요. 위에서 범위를 고르고 ‘AI로 흐름 분석하기’를 눌러 보세요.');p.className='formNotice';box.append(p);
+    const p2=node('p','아직 지난 분석이 없어요.');p2.className='formNotice';hist.append(p2);
+    return;
+  }
+  const cur=recs.find(r=>r.id===flowViewId)||recs[0];flowViewId=cur.id;
+  box.append(renderFlowRecord(cur));
+  recs.forEach(r=>{
+    const row=node('div','');row.className='fileRow';
+    const name=node('span',localDate(r.createdAt)+' · '+(FLOW_RANGE_LABEL[r.range]||'')+' · 기사 '+(r.items?r.items.length:0)+'건');name.className='fname';
+    row.append(name);
+    if(r.id===cur.id)row.append(node('small','보는 중'));
+    else{const v=button('보기',()=>{flowViewId=r.id;renderFlow();el('flowResult').scrollIntoView({block:'start'})});v.type='button';row.append(v)}
+    const d=button('삭제',()=>{if(!confirm('이 분석을 삭제할까요?'))return;writeFlow(readFlow().filter(x=>x.id!==r.id));if(flowViewId===r.id)flowViewId='';renderFlow()});
+    d.type='button';row.append(d);
+    hist.append(row);
+  });
+}
+el('flowForm').onsubmit=e=>{e.preventDefault();startFlow()};
+el('flowRange').onchange=renderFlowCount;
+
+function newsCard(m){
+  const card=node('div','');card.className='newsCard';
+  const head=node('div','');head.className='newsCardHead';
+  head.append(node('h4',m.title||'기사 캡처 메모'));
+  const del=button('삭제',()=>deleteNewsMemo(m));
+  del.type='button';del.className='artDel';
+  head.append(del);
+  card.append(head);
+  const meta=node('div','');meta.className='artMeta';
+  meta.append(node('span',[m.date,m.source].filter(Boolean).join(' · ')));
+  const u=safeUrl(m.url);
+  if(u){const link=node('a','원문 기사 보기 ↗');link.href=u;link.target='_blank';link.rel='noopener noreferrer';link.className='artLink';meta.append(link)}
+  card.append(meta);
+  if(Array.isArray(m.photoIds)&&m.photoIds.length){card.append(renderPhotoStrip(m.photoIds));card.append(renderSummaryBlock(m,{kind:'memo',entryId:m.id}))}
+  if(Array.isArray(m.termIds)&&m.termIds.length){
+    const chips=node('div','');chips.className='chipWrap';
+    for(const id of m.termIds){
+      const term=dictState.byId.get(Number(id));
+      const label=term?term.term:('용어 #'+id);
+      const c=button(label,()=>{if(term){location.hash='dictionary';setTimeout(()=>dictOpen(term),0)}});
+      c.type='button';c.className='termChip clickable';
+      chips.append(c);
+    }
+    card.append(chips);
+  }
+  if(m.note){const note=node('p',m.note);note.className='newsNote';card.append(note)}
+  return card;
+}
+function renderNewsMemos(){
+  const all=getNewsMemos().slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const today=all.filter(m=>daysAgo(m.date)<=0);
+  const recent=all.filter(m=>{const d=daysAgo(m.date);return d>=1&&d<=3});
+  const old=all.filter(m=>daysAgo(m.date)>3);
+  el('newsMemoStatus').textContent=!all.length?'아직 기록한 신문 요약이 없어요. 오늘 읽은 기사 캡처부터 올려 보세요.':(today.length?'오늘 '+today.length+'건 · 전체 '+all.length+'건이 쌓였어요.':'오늘 기록한 요약은 아직 없어요. (전체 '+all.length+'건)');
+  el('newsTabBtnLine').textContent=all.length?'2. 요약 ('+all.length+')':'2. 요약';
+  const flowDates=all.map(m=>m.date).filter(Boolean).sort();
+  el('flowInfo').textContent=all.length?'지금까지 '+all.length+'건의 요약이 쌓여 있어요'+(flowDates.length?' ('+flowDates[0]+' ~ '+flowDates[flowDates.length-1]+')':'')+'.':'아직 쌓인 요약이 없어요. 먼저 요약을 기록해 주세요.';
+  const list=el('newsMemoList');list.replaceChildren();
+  today.forEach(m=>list.append(newsCard(m)));
+  renderRecentMemos(recent);
+  renderNewsFiles(old);
+  renderFlowCount();
 }
 el('newsMemoForm').onsubmit=async e=>{
   e.preventDefault();
@@ -1233,7 +1591,7 @@ el('exportArchiveBtn').onclick=async()=>{
   memos.forEach(m=>(m.photoIds||[]).forEach(i=>ids.add(i)));
   const photos={};
   for(const id of ids){try{const b=await photoGet(id);if(b)photos[id]=await blobToDataUrl(b)}catch{}}
-  const payload={exportedAt:new Date().toISOString(),userArticles:arts,newsMemos:memos,mentions:getMentionsMap(),photos};
+  const payload={exportedAt:new Date().toISOString(),userArticles:arts,newsMemos:memos,flowAnalyses:readFlow(),mentions:getMentionsMap(),photos};
   const blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=node('a','');a.href=url;a.download='hankyung-archive-'+todayStamp()+'.json';a.click();
@@ -1259,6 +1617,10 @@ el('importArchiveFile').onchange=async e=>{
     if(Array.isArray(data.newsMemos)){
       const cur=getNewsMemos(),seen=new Set(cur.map(x=>x.id));
       writeJsonStore(NEWS_MEMO_KEY,[...cur,...data.newsMemos.filter(x=>x&&!seen.has(x.id))]);
+    }
+    if(Array.isArray(data.flowAnalyses)){
+      const cur=readFlow(),seen=new Set(cur.map(x=>x.id));
+      writeFlow([...cur,...data.flowAnalyses.filter(x=>x&&x.id&&!seen.has(x.id))]);
     }
     if(data.mentions&&typeof data.mentions==='object'){
       const cur=getMentionsMap();
