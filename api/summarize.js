@@ -151,7 +151,12 @@ module.exports = async function handler(req, res) {
   try {
     let last = null;
     for (const model of candidateModels()) {
-      const { status, json } = await callGemini(model, apiKey, images, hint);
+      let attempt = await callGemini(model, apiKey, images, hint);
+      for (let i = 0; i < 2 && (attempt.status === 503 || attempt.status === 500 || attempt.status === 504); i++) {
+        await new Promise((r) => setTimeout(r, 2000 * (i + 1)));
+        attempt = await callGemini(model, apiKey, images, hint);
+      }
+      const { status, json } = attempt;
       if (status === 404) { last = { status, json, model }; continue; }
       if (status === 429) return send(429, { error: 'AI 요약 사용량 한도에 걸렸어요. 잠시 뒤에 다시 시도해 주세요.' });
       if (status === 400 || status === 401 || status === 403) {
@@ -162,6 +167,7 @@ module.exports = async function handler(req, res) {
       }
       if (status < 200 || status >= 300) {
         console.error('gemini error', status, model, JSON.stringify(json).slice(0, 300));
+        if (status === 503) return send(503, { error: 'Google AI 서버가 지금 요청이 몰려 바빠요. 1~2분 뒤에 다시 눌러 주세요.' });
         return send(502, { error: 'AI 서버에서 오류가 났어요. 잠시 뒤에 다시 시도해 주세요.' });
       }
       if (json && json.promptFeedback && json.promptFeedback.blockReason) {
