@@ -935,7 +935,8 @@ function askQuotaChoice(message){
     box.showModal();
   });
 }
-async function runSummary(target,photoIds,fromAuto){
+const AI_BATCH=4;
+async function runSummary(target,photoIds,fromAuto,from=0,acc=null){
   const id=target.entryId;
   if(aiStoppedToday()){
     summaryUi.err.set(id,'오늘은 AI 요약을 멈췄어요. 내일 다시 요약할 수 있어요. 사진은 그대로 있어요.');
@@ -943,15 +944,21 @@ async function runSummary(target,photoIds,fromAuto){
     return;
   }
   summaryUi.busy.add(id);summaryUi.err.delete(id);refreshAfterSummary(target);
+  let articles=acc?acc.slice():[];
+  let pos=from;
   try{
-    const s=await requestSummary(photoIds,hintFor(target));
-    if(!saveSummary(target,s))throw new Error('msg:요약을 저장하지 못했어요.');
+    for(;pos<photoIds.length;pos+=AI_BATCH){
+      const s=await requestSummary(photoIds.slice(pos,pos+AI_BATCH),hintFor(target));
+      articles=articles.concat(s.articles);
+      if(!saveSummary(target,{articles}))throw new Error('msg:요약을 저장하지 못했어요.');
+      refreshAfterSummary(target);
+    }
   }catch(err){
     const m=String(err&&err.message||'');
     if(m.startsWith('quota:')){
       summaryUi.busy.delete(id);refreshAfterSummary(target);
       const choice=await askQuotaChoice(m.slice(6));
-      if(choice==='retry'){summaryUi.busy.delete(id);return runSummary(target,photoIds,fromAuto)}
+      if(choice==='retry'){summaryUi.busy.delete(id);return await runSummary(target,photoIds,fromAuto,pos,articles)}
       stopAiToday();
       summaryUi.err.set(id,'오늘은 AI 요약을 멈췄어요. 내일 다시 요약할 수 있어요. 사진은 그대로 있어요.');
     }else summaryUi.err.set(id,summaryErrorText(err));
