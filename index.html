@@ -221,7 +221,7 @@ dialog::backdrop{background:rgba(16,16,20,.45)}
 .formRow2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .formNotice{display:block;margin-top:8px;font-size:12.5px;color:var(--muted);line-height:1.5}
 .dictFormBox{margin-top:16px;background:#fafaf8;padding:16px 18px;border:1px solid var(--line);border-radius:8px}
-#dictionary textarea{width:100%;min-height:86px;display:block}
+#dictionary textarea,#newsPage textarea{width:100%;min-height:86px;display:block}
 .chipWrap{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .termChip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--blue-soft);color:var(--blue);font-size:13px;font-weight:600;border:0}
 .termChip button{border:0;background:transparent;padding:0 2px;color:var(--blue);font-weight:700;line-height:1}
@@ -352,7 +352,6 @@ button.photoThumb:hover{border-color:var(--blue)}
 <p class="intro">정식 명칭이나 약어(예: BW, CB, PDI)로 찾고, 매일 읽은 한경 기사의 표현과 메모를 용어와 연결해 보세요.</p>
 <div class="dictTabs" role="tablist" aria-label="경제 사전 보기 전환">
   <button type="button" role="tab" id="tabBtnSearch" aria-selected="true">용어 검색</button>
-  <button type="button" role="tab" id="tabBtnNews" aria-selected="false">오늘의 기사 메모</button>
   <button type="button" role="tab" id="tabBtnFreq" aria-selected="false">기사 빈도 TOP</button>
 </div>
 <div id="dictTabSearch">
@@ -399,8 +398,29 @@ button.photoThumb:hover{border-color:var(--blue)}
     </section>
   </article>
 </div>
-<div id="dictTabNews" hidden>
+<div id="dictTabFreq" hidden>
   <section>
+    <h2>기사 빈도 TOP 용어</h2>
+    <p class="intro" style="margin-bottom:16px">기사 속 표현, 오늘의 기사 메모, ‘오늘 기사에 나옴’ 기록을 합산해 자주 나오는 용어를 보여 줍니다. 상위 30~50개부터 기사 속 표현을 채워 보세요.</p>
+    <div id="freqStats" class="freqStats"></div>
+    <div class="freqBar">
+      <small id="freqHint"></small>
+      <label style="margin:0;display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink)"><input type="checkbox" id="freqOnlyTodo"> 표현 미작성 용어만 보기</label>
+    </div>
+    <div id="freqList"></div>
+    <div class="backupBar">
+      <button type="button" id="exportArchiveBtn">기사 기록·사진 백업 (JSON)</button>
+      <button type="button" id="importArchiveBtn">백업 불러오기</button>
+      <input type="file" id="importArchiveFile" accept="application/json" hidden>
+      <small id="backupStatus" role="status" style="align-self:center"></small>
+    </div>
+  </section>
+</div>
+</main>
+<main id="newsPage" hidden>
+<h1>오늘의 기사 메모</h1>
+<p class="intro">매일 읽은 한경 기사 캡처와 한 줄 해석을 기록하고, 관련 경제 용어와 연결해 보세요.</p>
+<section>
     <h2>오늘의 기사 메모 작성</h2>
     <form id="newsMemoForm">
       <div class="formRow2">
@@ -426,25 +446,6 @@ button.photoThumb:hover{border-color:var(--blue)}
     <p id="newsMemoStatus" role="status"></p>
     <div id="newsMemoList"></div>
   </section>
-</div>
-<div id="dictTabFreq" hidden>
-  <section>
-    <h2>기사 빈도 TOP 용어</h2>
-    <p class="intro" style="margin-bottom:16px">기사 속 표현, 오늘의 기사 메모, ‘오늘 기사에 나옴’ 기록을 합산해 자주 나오는 용어를 보여 줍니다. 상위 30~50개부터 기사 속 표현을 채워 보세요.</p>
-    <div id="freqStats" class="freqStats"></div>
-    <div class="freqBar">
-      <small id="freqHint"></small>
-      <label style="margin:0;display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink)"><input type="checkbox" id="freqOnlyTodo"> 표현 미작성 용어만 보기</label>
-    </div>
-    <div id="freqList"></div>
-    <div class="backupBar">
-      <button type="button" id="exportArchiveBtn">기사 기록·사진 백업 (JSON)</button>
-      <button type="button" id="importArchiveBtn">백업 불러오기</button>
-      <input type="file" id="importArchiveFile" accept="application/json" hidden>
-      <small id="backupStatus" role="status" style="align-self:center"></small>
-    </div>
-  </section>
-</div>
 </main><main id="fitness" class="journal" hidden><h1>운동 기록</h1><section><h2>오늘은 어떤 운동?</h2><label>운동한 날짜<input type="date" id="sportDate" required></label><div class="sports" id="sportMenu" aria-label="운동 선택"></div><div id="weights" hidden><h2>웨이트 운동 도감</h2><nav id="bodyGroups" aria-label="부위별 운동"></nav><label>종목 검색<input type="search" id="liftFind" placeholder="시티드 로우, 벤치프레스, squat"></label><p id="liftCount"></p><div id="liftGrid"></div><button id="moreLifts" type="button">더 보기</button><article id="liftView" hidden><h3 id="liftName"></h3><div id="poseList"></div></article><small>원자료의 주동근 기준 · 근력·파워리프팅·역도·스트롱맨 종목과 변형 포함<br>동작 사진 및 영문명 · <a href="https://github.com/yuhonas/free-exercise-db">Free Exercise DB</a></small></div><button class="primary" id="sportSave">운동 기록하기</button><p role="status" id="sportStatus"></p><details><summary>내 운동 메뉴 추가</summary><form id="sportAdd" class="addsport"><label>운동 이름<input name="sport" required maxlength="60"></label><button>추가</button></form></details></section><section><h2>운동별 누적 일수</h2><div id="sportChart"></div></section><section><h2>지난 운동</h2><div id="sportHistory"></div></section></main>
 <main id="journal" class="journal" hidden><h1 id="journalTitle"></h1><section><form id="journalForm"></form></section><h2>지난 기록</h2><div id="records"></div><p id="journalStatus" role="status"></p></main>
 <main id="study" hidden><small id="stamp"></small><h1>수업과 과제</h1><div id="week" class="week" aria-label="이번 주 날짜 선택"></div>
@@ -610,27 +611,27 @@ const dictState={terms:null,source:'',loading:null,limit:20,byKey:new Map(),byId
 function setDictTab(tab){
   dictState.tab=tab;
   el('dictTabSearch').hidden=tab!=='search';
-  el('dictTabNews').hidden=tab!=='news';
   el('dictTabFreq').hidden=tab!=='freq';
   el('tabBtnSearch').setAttribute('aria-selected',tab==='search');
-  el('tabBtnNews').setAttribute('aria-selected',tab==='news');
   el('tabBtnFreq').setAttribute('aria-selected',tab==='freq');
-  if(tab==='news'){
-    const f=el('newsMemoForm');
-    if(f&&!f.elements.date.value)f.elements.date.value=todayStamp();
-    renderNewsMemos();
-  }
   if(tab==='freq')renderFreqTab();
 }
 el('tabBtnSearch').onclick=()=>setDictTab('search');
-el('tabBtnNews').onclick=()=>setDictTab('news');
 el('tabBtnFreq').onclick=()=>setDictTab('freq');
+
+function openNewsPage(){
+  const f=el('newsMemoForm');
+  if(f&&!f.elements.date.value)f.elements.date.value=todayStamp();
+  renderNewsMemos();
+  if(!dictState.terms)dictLoad().then(()=>renderNewsMemos()).catch(()=>{});
+}
 
 function route(){
   const k=location.hash.slice(1),
     isJournal=Object.hasOwn(journalTypes,k),
-    isDict=k==='dictionary'||k==='news',
-    isHome=k!=='study'&&k!=='exercise'&&!isJournal&&!isDict;
+    isDict=k==='dictionary',
+    isNews=k==='news',
+    isHome=k!=='study'&&k!=='exercise'&&!isJournal&&!isDict&&!isNews;
   el('fitness').hidden=k!=='exercise';
   if(k==='exercise')renderSports();
   if(k==='study')renderRoutines();
@@ -640,15 +641,17 @@ function route(){
   el('subTopBar').hidden=isHome;
   el('backHome').hidden=isHome;
   el('dictionary').hidden=!isDict;
+  el('newsPage').hidden=!isNews;
   const active=isHome?'home':k;
   document.querySelectorAll('.railNav a[data-route]').forEach(a=>{
     if(a.dataset.route===active)a.setAttribute('aria-current','page');
     else a.removeAttribute('aria-current');
   });
   if(isDict){
-    setDictTab(k==='news'?'news':'search');
+    setDictTab('search');
     dictStart();
   }
+  if(isNews)openNewsPage();
   if(isJournal)openJournal(k);
   window.scrollTo(0,0);
 }
@@ -1071,7 +1074,7 @@ function renderNewsMemos(){
       for(const id of m.termIds){
         const term=dictState.byId.get(Number(id));
         const label=term?term.term:('용어 #'+id);
-        const c=button(label,()=>{if(term)dictOpen(term)});
+        const c=button(label,()=>{if(term){location.hash='dictionary';setTimeout(()=>dictOpen(term),0)}});
         c.type='button';c.className='termChip clickable';
         chips.append(c);
       }
@@ -1219,11 +1222,10 @@ el('importArchiveFile').onchange=async e=>{
 function dictStart(){
   if(!dictState.terms){
     el('dictCount').textContent='용어를 불러오는 중이에요…';
-    dictLoad().then(()=>{dictRenderResults();if(dictState.tab==='news')renderNewsMemos();if(dictState.tab==='freq')renderFreqTab()}).catch(()=>{el('dictCount').textContent='사전 데이터를 불러오지 못했어요. 배포된 사이트 주소에서 열어 주세요.'});
+    dictLoad().then(()=>{dictRenderResults();if(dictState.tab==='freq')renderFreqTab()}).catch(()=>{el('dictCount').textContent='사전 데이터를 불러오지 못했어요. 배포된 사이트 주소에서 열어 주세요.'});
     return;
   }
   dictRenderResults();
-  if(dictState.tab==='news')renderNewsMemos();
   if(dictState.tab==='freq')renderFreqTab();
 }
 el('dictFind').oninput=()=>{dictState.limit=20;dictRenderResults()};
