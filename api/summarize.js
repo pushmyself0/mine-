@@ -11,7 +11,7 @@ const MAX_IMAGES = 4;
 const MAX_IMAGE_B64 = 2000000;
 const MAX_TOTAL_B64 = 3900000;
 const WINDOW_MS = 10 * 60 * 1000;
-const MAX_REQUESTS = 30;
+const MAX_REQUESTS = 80;
 const MAX_FAILED_AUTH = 8;
 
 const requestLog = new Map();
@@ -86,27 +86,40 @@ async function callGemini(model, apiKey, images, hint) {
   for (const data of images) parts.push({ inline_data: { mime_type: 'image/jpeg', data } });
 
   const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent';
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      contents: [{ role: 'user', parts }],
-      generationConfig: {
-        temperature: 0.3,
-        maxOutputTokens: 4096,
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: 'ARRAY',
-          items: {
-            type: 'OBJECT',
-            properties: { title: { type: 'STRING' }, summary: { type: 'STRING' } },
-            required: ['title', 'summary'],
-          },
-        },
+  const genCfg = {
+    temperature: 0.3,
+    maxOutputTokens: 4096,
+    responseMimeType: 'application/json',
+    responseSchema: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: { title: { type: 'STRING' }, summary: { type: 'STRING' } },
+        required: ['title', 'summary'],
       },
-    }),
-  });
+    },
+  };
+  if (/2\.5/.test(model)) genCfg.thinkingConfig = { thinkingBudget: 0 };
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 45000);
+  let res;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+      signal: ctrl.signal,
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: [{ role: 'user', parts }],
+        generationConfig: genCfg,
+      }),
+    });
+  } catch (err) {
+    if (err && err.name === 'AbortError') return { status: 504, json: null };
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
   let json = null;
   try { json = await res.json(); } catch { json = null; }
   return { status: res.status, json };
@@ -167,13 +180,14 @@ module.exports = async function handler(req, res) {
     let last = null;
     for (const model of candidateModels()) {
       let attempt = await callGemini(model, apiKey, images, hint);
-      for (let i = 0; i < 2 && (attempt.status === 503 || attempt.status === 500 || attempt.status === 504); i++) {
-        await new Promise((r) => setTimeout(r, 2000 * (i + 1)));
+      if (attempt.status === 503 || attempt.status === 500) {
+        await new Promise((r) => setTimeout(r, 1500));
         attempt = await callGemini(model, apiKey, images, hint);
       }
       const { status, json } = attempt;
       if (status === 404) { last = { status, json, model }; continue; }
       if (status === 429) return send(429, { error: 'AI 요약 사용량 한도에 걸렸어요. 잠시 뒤에 다시 시도해 주세요.' });
+      if (status === 504) return send(504, { error: 'AI 응답이 늦어졌어요. 자동으로 다시 시도해요.' });
       if (status === 400 || status === 401 || status === 403) {
         const msg = json && json.error && json.error.message ? String(json.error.message) : '';
         console.error('gemini auth/request error', status, model, msg);
