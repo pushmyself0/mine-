@@ -419,6 +419,12 @@ button.photoThumb:hover{border-color:var(--blue)}
 <main id="newsPage" hidden>
 <h1>신문 요약 및 흐름 형성</h1>
 <p class="intro">매일 읽은 신문 기사 캡처를 올리면 AI가 요약하고, 날짜순으로 쌓아 흐름을 볼 수 있어요.</p>
+<div class="dictTabs" role="tablist" aria-label="신문 요약 보기 전환">
+  <button type="button" role="tab" id="newsTabBtnWrite" aria-selected="true">요약 기록하기</button>
+  <button type="button" role="tab" id="newsTabBtnLine" aria-selected="false">요약 타임라인</button>
+  <button type="button" role="tab" id="newsTabBtnFlow" aria-selected="false">흐름 형성</button>
+</div>
+<div id="newsTabWrite">
 <section>
     <h2>신문 요약 기록하기</h2>
     <form id="newsMemoForm">
@@ -440,11 +446,21 @@ button.photoThumb:hover{border-color:var(--blue)}
       <small class="formNotice">사진은 이 브라우저에만 저장되고 사이트에 공개되지 않아요(AI 요약을 쓰면 요약을 위해 Google Gemini로 전송돼요). 여기서 태그한 용어는 자동으로 기사 빈도에 쌓이고, 오늘 날짜로 저장한 용어는 ‘오늘의 경제용어’ 창에 우선 표시됩니다.</small>
     </form>
   </section>
+</div>
+<div id="newsTabLine" hidden>
   <section>
     <h2>요약 타임라인</h2>
     <p id="newsMemoStatus" role="status"></p>
     <div id="newsMemoList"></div>
   </section>
+</div>
+<div id="newsTabFlow" hidden>
+  <section>
+    <h2>흐름 형성</h2>
+    <p class="intro">쌓인 요약들을 이어서 한눈에 흐름으로 보는 곳이에요. 흐름을 만드는 기준(알고리즘)이 정해지면 여기에 채울 거예요.</p>
+    <p id="flowInfo" role="status"></p>
+  </section>
+</div>
 </main><main id="fitness" class="journal" hidden><h1>운동 기록</h1><section><h2>오늘은 어떤 운동?</h2><label>운동한 날짜<input type="date" id="sportDate" required></label><div class="sports" id="sportMenu" aria-label="운동 선택"></div><div id="weights" hidden><h2>웨이트 운동 도감</h2><nav id="bodyGroups" aria-label="부위별 운동"></nav><label>종목 검색<input type="search" id="liftFind" placeholder="시티드 로우, 벤치프레스, squat"></label><p id="liftCount"></p><div id="liftGrid"></div><button id="moreLifts" type="button">더 보기</button><article id="liftView" hidden><h3 id="liftName"></h3><div id="poseList"></div></article><small>원자료의 주동근 기준 · 근력·파워리프팅·역도·스트롱맨 종목과 변형 포함<br>동작 사진 및 영문명 · <a href="https://github.com/yuhonas/free-exercise-db">Free Exercise DB</a></small></div><button class="primary" id="sportSave">운동 기록하기</button><p role="status" id="sportStatus"></p><details><summary>내 운동 메뉴 추가</summary><form id="sportAdd" class="addsport"><label>운동 이름<input name="sport" required maxlength="60"></label><button>추가</button></form></details></section><section><h2>운동별 누적 일수</h2><div id="sportChart"></div></section><section><h2>지난 운동</h2><div id="sportHistory"></div></section></main>
 <main id="journal" class="journal" hidden><h1 id="journalTitle"></h1><section><form id="journalForm"></form></section><h2>지난 기록</h2><div id="records"></div><p id="journalStatus" role="status"></p></main>
 <main id="study" hidden><small id="stamp"></small><h1>수업과 과제</h1><div id="week" class="week" aria-label="이번 주 날짜 선택"></div>
@@ -618,6 +634,17 @@ function setDictTab(tab){
 el('tabBtnSearch').onclick=()=>setDictTab('search');
 el('tabBtnFreq').onclick=()=>setDictTab('freq');
 
+let newsTab='write';
+function setNewsTab(tab){
+  newsTab=tab;
+  [['write','Write'],['line','Line'],['flow','Flow']].forEach(([k,n])=>{
+    el('newsTab'+n).hidden=tab!==k;
+    el('newsTabBtn'+n).setAttribute('aria-selected',tab===k);
+  });
+}
+el('newsTabBtnWrite').onclick=()=>setNewsTab('write');
+el('newsTabBtnLine').onclick=()=>setNewsTab('line');
+el('newsTabBtnFlow').onclick=()=>setNewsTab('flow');
 function openNewsPage(){
   const f=el('newsMemoForm');
   if(f&&!f.elements.date.value)f.elements.date.value=todayStamp();
@@ -1063,6 +1090,9 @@ function renderNewsMemos(){
   const list=el('newsMemoList');list.replaceChildren();
   const memos=getNewsMemos().slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   el('newsMemoStatus').textContent=memos.length?'총 '+memos.length+'건의 신문 요약이 쌓였어요.':'아직 기록한 신문 요약이 없어요. 오늘 읽은 기사 캡처부터 올려 보세요.';
+  el('newsTabBtnLine').textContent=memos.length?'요약 타임라인 ('+memos.length+')':'요약 타임라인';
+  const flowDates=memos.map(m=>m.date).filter(Boolean).sort();
+  el('flowInfo').textContent=memos.length?'지금까지 '+memos.length+'건의 요약이 쌓여 있어요'+(flowDates.length?' ('+flowDates[0]+' ~ '+flowDates[flowDates.length-1]+')':'')+'.':'아직 쌓인 요약이 없어요. 먼저 요약을 기록해 주세요.';
   let lastDate='';
   for(const m of memos){
     if(m.date!==lastDate){lastDate=m.date;const dh=node('h3',m.date||'날짜 없음');dh.style.marginTop='24px';list.append(dh)}
@@ -1127,7 +1157,7 @@ el('newsMemoForm').onsubmit=async e=>{
     dictState.newsSelected=[];
     renderNewsSelectedChips();
     el('newsTermSuggest').replaceChildren();
-    status.textContent='';
+    status.textContent=auto&&photoIds.length?'저장했어요. AI 요약은 ‘요약 타임라인’ 탭에서 확인해요.':'저장했어요. ‘요약 타임라인’ 탭에서 확인해요.';
     renderNewsMemos();
     if(auto&&photoIds.length)runSummary({kind:'memo',entryId:entry.id},photoIds,true);
   }catch{
