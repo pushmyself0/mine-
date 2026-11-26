@@ -26,7 +26,7 @@ summary{font-weight:650}
 label{display:block;margin:10px 0;font-size:13.5px;color:var(--muted)}
 input,select,textarea{font:inherit;max-width:100%;padding:10px 12px;border:1px solid #ddd8cd;border-radius:8px;background:#fff;color:var(--ink);margin-top:5px;transition:border-color .15s,box-shadow .15s}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,41,133,.1)}
-input:not([type=checkbox]),select{display:block;width:100%}
+input:not([type=checkbox]),select,textarea{display:block;width:100%}
 small,footer{color:var(--muted)}
 h1{font-family:var(--serif);font-size:clamp(30px,4vw,42px);letter-spacing:-.02em;font-weight:700;margin:0 0 22px;line-height:1.2}
 h2{font-size:19px;letter-spacing:-.02em;font-weight:700;margin:0 0 16px}
@@ -39,22 +39,21 @@ h3{font-size:15px;letter-spacing:-.01em;font-weight:700;margin:18px 0 6px}
 
 /* Architectural deep-indigo brand mark */
 .brandBox{
-  position:relative;display:flex;flex-direction:column;justify-content:space-between;
-  width:176px;height:176px;padding:22px 22px 18px;
-  background:linear-gradient(145deg,#1d319c 0%,#111e66 100%);color:#fff;text-decoration:none;
-  border-radius:3px;
-  box-shadow:0 14px 34px rgba(17,30,102,.18),inset 0 0 0 1px rgba(255,255,255,.12);
+  position:relative;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+  width:172px;height:172px;padding:24px;
+  background:linear-gradient(150deg,#1c2f96 0%,#101d63 100%);color:#fff;text-decoration:none;
+  border-radius:4px;
+  box-shadow:0 14px 34px rgba(16,29,99,.18),inset 0 0 0 1px rgba(255,255,255,.14);
   transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s ease;
 }
-.brandBox:hover{transform:translateY(-3px);box-shadow:0 20px 42px rgba(17,30,102,.24),inset 0 0 0 1px rgba(255,255,255,.18)}
-.brandLines{font-family:var(--serif);font-size:38px;font-weight:700;line-height:1.15;letter-spacing:.02em}
+.brandBox:hover{transform:translateY(-3px);box-shadow:0 20px 42px rgba(16,29,99,.24),inset 0 0 0 1px rgba(255,255,255,.2)}
+.brandLines{font-family:var(--serif);font-size:36px;font-weight:700;line-height:1.1;letter-spacing:.04em}
 .brandLines span{display:block}
-.brandSub{font-family:'Cormorant Garamond',Georgia,serif;font-size:12px;letter-spacing:.26em;opacity:.78;text-transform:uppercase}
+.brandSub{margin-top:8px;font-family:'Cormorant Garamond',Georgia,serif;font-size:12.5px;letter-spacing:.32em;opacity:.78;text-transform:uppercase}
 .brandSide{
-  position:absolute;right:14px;bottom:16px;
-  writing-mode:vertical-rl;transform:rotate(180deg);
+  position:absolute;right:14px;bottom:14px;
   font-family:'Cormorant Garamond',Georgia,serif;
-  font-size:11px;letter-spacing:.24em;font-weight:600;opacity:.75;text-transform:uppercase;
+  font-size:10px;letter-spacing:.22em;font-weight:600;opacity:.62;text-transform:uppercase;
 }
 
 .railNav{display:flex;flex-direction:column;gap:14px}
@@ -83,21 +82,37 @@ h3{font-size:15px;letter-spacing:-.01em;font-weight:700;margin:18px 0 6px}
 .topBar a{font-size:13.5px;text-decoration:none;color:var(--muted);letter-spacing:.01em}
 .topBar a:hover{color:var(--blue)}
 
-/* Home editorial masonry grid */
-.shelf{column-count:3;column-gap:38px}
+/* Home asymmetric editorial magazine grid (12-col Kinfolk/Cereal rhythm) */
+.shelf{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:44px 34px;align-items:start}
 .magCard{
-  display:inline-block;width:100%;break-inside:avoid;margin:0 0 44px;
-  text-decoration:none;color:var(--ink);vertical-align:top;
+  display:block;width:100%;margin:0;
+  text-decoration:none;color:var(--ink);
 }
-.magMedia{overflow:hidden;background:#e8e4dc;border-radius:3px;box-shadow:0 8px 26px rgba(23,22,20,.06);transition:box-shadow .35s ease}
-.magCard:hover .magMedia{box-shadow:0 14px 36px rgba(23,22,20,.12)}
-.magMedia img{display:block;width:100%;height:auto;object-fit:cover;transition:transform .55s cubic-bezier(.22,1,.36,1)}
-.magCard.tall .magMedia img{aspect-ratio:3/4}
-.magCard.square .magMedia img{aspect-ratio:1/1}
-.magCard.wide .magMedia img{aspect-ratio:4/3}
+.magCard.hero{grid-column:span 7}
+.magCard.side{grid-column:span 5;margin-top:42px}
+.magCard.colA{grid-column:span 4}
+.magCard.colB{grid-column:span 4;margin-top:52px}
+.magCard.colC{grid-column:span 4;margin-top:16px}
+.magMedia{overflow:hidden;background:#e8e4dc;border-radius:3px;box-shadow:0 10px 30px rgba(23,22,20,.07);transition:box-shadow .35s ease}
+.magCard:hover .magMedia{box-shadow:0 16px 40px rgba(23,22,20,.13)}
+.magMedia img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.22,1,.36,1)}
+.magCard.hero .magMedia{aspect-ratio:16/11}
+.magCard.side .magMedia{aspect-ratio:4/5}
+.magCard.colA .magMedia{aspect-ratio:3/4}
+.magCard.colB .magMedia{aspect-ratio:1/1}
+.magCard.colC .magMedia{aspect-ratio:4/3}
 .magCard:hover .magMedia img{transform:scale(1.035)}
-.magCard strong{display:block;margin-top:15px;font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.35;color:var(--ink);transition:color .18s}
+.magCard strong{display:block;margin-top:14px;font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.35;color:var(--ink);transition:color .18s}
 .magCard:hover strong{color:var(--blue)}
+@media(max-width:980px){
+  .shelf{grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 24px}
+  .magCard.hero{grid-column:span 2}
+  .magCard.side,.magCard.colA,.magCard.colB,.magCard.colC{grid-column:span 1;margin-top:0}
+}
+@media(max-width:600px){
+  .shelf{grid-template-columns:1fr;gap:28px}
+  .magCard.hero{grid-column:span 1}
+}
 
 /* Subpage cards & sections */
 main:not(#home):not(#museum){max-width:860px}
@@ -214,6 +229,29 @@ dialog::backdrop{background:rgba(20,19,17,.45);backdrop-filter:blur(5px)}
 .stepNav{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:4px 0 16px}
 .stepNav button{font-weight:600;color:var(--blue);border-color:var(--blue)}
 .stepNav button:hover{background:var(--blue-soft)}
+.aiProgBox{margin:10px 0 4px}
+.aiProgTop{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--blue);font-weight:650;margin-bottom:6px;gap:8px}
+.aiProgTrack{height:8px;background:var(--blue-soft);border-radius:999px;overflow:hidden}
+.aiProgFill{height:100%;background:linear-gradient(90deg,var(--blue),#3952d4);border-radius:999px;transition:width .35s ease}
+/* Monthly 31-day ledger */
+.ledgerSummary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.ledgerStat{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.ledgerStat small{display:block;font-size:12.5px;color:var(--muted)}
+.ledgerStat strong{display:block;margin-top:4px;font-size:19px;font-weight:750;letter-spacing:-.02em}
+.ledgerStat.inc strong{color:#15693b}
+.ledgerStat.exp strong{color:#b42318}
+.ledgerWrap{overflow-x:auto}
+.ledgerTbl{width:100%;border-collapse:collapse;font-size:14px}
+.ledgerTbl th{text-align:left;padding:10px 8px;border-bottom:2px solid var(--line);font-size:13px;color:var(--muted);font-weight:650;white-space:nowrap}
+.ledgerTbl td{padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+.ledgerTbl td.dayCol{width:54px;font-weight:700;color:var(--muted);text-align:center;white-space:nowrap}
+.ledgerTbl tr.todayRow td.dayCol{color:var(--blue)}
+.ledgerTbl tr.dimRow{opacity:.42}
+.ledgerTbl input{margin:0;padding:7px 9px;font-size:13.5px;border-color:transparent;background:transparent;border-radius:6px}
+.ledgerTbl input:hover{border-color:#e2ddd2;background:#faf9f6}
+.ledgerTbl input:focus{border-color:var(--blue);background:#fff}
+.ledgerTbl input.num{text-align:right;font-variant-numeric:tabular-nums}
+@media(max-width:600px){.ledgerSummary{grid-template-columns:1fr}}
 .syncBtn{padding:3px 10px;font-size:12.5px;margin-left:6px}
 /* Study Calendar */
 .calBar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;flex-wrap:wrap}
@@ -441,11 +479,11 @@ button.photoThumb:hover{border-color:var(--blue)}
 <div class="stage">
 <div class="topBar" id="subTopBar" hidden><a id="backHome" href="#home">← 전체 보기로 돌아가기</a></div>
 <main id="home"><nav class="shelf" aria-label="카테고리 목록">
-<a class="magCard tall" href="#flow"><div class="magMedia"><img src="images/flow.jpg" alt="커피잔과 펼쳐진 신문" loading="eager"></div><strong>신문 요약 및 흐름 형성</strong></a>
-<a class="magCard wide" href="#museum"><div class="magMedia"><img src="images/memo.jpg" alt="손글씨가 적힌 노트와 만년필" loading="eager"></div><strong>박물관</strong></a>
-<a class="magCard tall" href="#study"><div class="magMedia"><img src="images/study.jpg" alt="햇빛이 드는 책상 위 노트와 펜" loading="eager"></div><strong>수업과 과제</strong></a>
-<a class="magCard square" href="#money"><div class="magMedia"><img src="images/money.jpg" alt="커튼 그림자가 진 의자 위 커피잔" loading="eager"></div><strong>경제 관념 다듬기</strong></a>
-<a class="magCard wide" href="#dictionary"><div class="magMedia"><img src="images/dictionary.jpg" alt="신문과 노트, 커피가 놓인 나무 테이블" loading="eager"></div><strong>경제 사전</strong></a>
+<a class="magCard hero" href="#flow"><div class="magMedia"><img src="images/flow.jpg" alt="커피잔과 펼쳐진 신문" loading="eager"></div><strong>신문 요약 및 흐름 형성</strong></a>
+<a class="magCard side" href="#study"><div class="magMedia"><img src="images/study.jpg" alt="햇빛이 드는 책상 위 노트와 펜" loading="eager"></div><strong>수업과 과제</strong></a>
+<a class="magCard colA" href="#museum"><div class="magMedia"><img src="images/memo.jpg" alt="손글씨가 적힌 노트와 만년필" loading="eager"></div><strong>박물관</strong></a>
+<a class="magCard colB" href="#money"><div class="magMedia"><img src="images/money.jpg" alt="커튼 그림자가 진 의자 위 커피잔" loading="eager"></div><strong>경제 관념 다듬기</strong></a>
+<a class="magCard colC" href="#dictionary"><div class="magMedia"><img src="images/dictionary.jpg" alt="신문과 노트, 커피가 놓인 나무 테이블" loading="eager"></div><strong>경제 사전</strong></a>
 </nav></main>
 <main id="dictionary" hidden>
 <h1>경제 사전</h1>
@@ -601,7 +639,31 @@ button.photoThumb:hover{border-color:var(--blue)}
 <p id="museumStatus" role="status" class="formNotice"></p>
 <div id="museumGrid" class="museumGrid"></div>
 </main>
-<main id="journal" class="journal" hidden><h1 id="journalTitle"></h1><section><form id="journalForm"></form></section><h2>지난 기록</h2><div id="records"></div><p id="journalStatus" role="status"></p></main>
+<main id="moneyPage" hidden>
+<h1>경제 관념 다듬기</h1>
+<section>
+  <div class="calBar">
+    <h2 id="ledgerMonthLabel"></h2>
+    <div class="calNav">
+      <button type="button" id="ledgerPrev">← 이전 달</button>
+      <button type="button" id="ledgerToday">이번 달</button>
+      <button type="button" id="ledgerNext">다음 달 →</button>
+    </div>
+  </div>
+  <div class="ledgerSummary">
+    <div class="ledgerStat inc"><small>이번 달 수입</small><strong id="ledgerIncSum">0원</strong></div>
+    <div class="ledgerStat exp"><small>이번 달 지출</small><strong id="ledgerExpSum">0원</strong></div>
+    <div class="ledgerStat"><small>잔액 (수입 − 지출)</small><strong id="ledgerNetSum">0원</strong></div>
+  </div>
+  <div class="ledgerWrap">
+    <table class="ledgerTbl" aria-label="월별 수입·지출·비고 표">
+      <thead><tr><th style="text-align:center">일</th><th style="text-align:right">수입 (원)</th><th style="text-align:right">지출 (원)</th><th>비고</th></tr></thead>
+      <tbody id="ledgerBody"></tbody>
+    </table>
+  </div>
+  <p id="ledgerStatus" role="status" class="formNotice" style="margin-top:12px"></p>
+</section>
+</main>
 <main id="study" hidden><small id="stamp"></small><h1>수업과 과제</h1>
 <div class="dictTabs" role="tablist" aria-label="수업과 과제 보기 전환">
   <button type="button" role="tab" id="studyTabBtnMain" aria-selected="true">수업·과제</button>
@@ -635,7 +697,7 @@ button.photoThumb:hover{border-color:var(--blue)}
         <label>시간 (선택)<input type="time" name="time"></label>
       </div>
       <label>일정 제목<input name="title" placeholder="예: 팀플 회의, 도서관 공부, 약속" required maxlength="100"></label>
-      <label>메모 (선택)<textarea name="memo" rows="2" maxlength="400" placeholder="장소나 준비물 등"></textarea></label>
+      <div style="margin:12px 0"><textarea name="memo" rows="3" maxlength="400" aria-label="메모 (선택)" placeholder="메모 (선택) — 장소나 준비물 등을 적어 보세요"></textarea></div>
       <button type="submit" class="primary">+ 일정 추가</button>
     </form>
   </section>
@@ -986,16 +1048,16 @@ function openNewsPage(){
 function route(){
   const raw=location.hash.slice(1),
     k=raw==='memo'?'museum':raw,
-    isJournal=Object.hasOwn(journalTypes,k),
+    isMoney=k==='money',
     isDict=k==='dictionary',
     isNews=k==='flow'||k==='news',
     isMuseum=k==='museum',
-    isHome=k!=='study'&&!isMuseum&&!isJournal&&!isDict&&!isNews;
+    isHome=k!=='study'&&!isMuseum&&!isMoney&&!isDict&&!isNews;
   if(k==='study'){renderRoutines();renderStudyCal()}
   el('home').hidden=!isHome;
   el('study').hidden=k!=='study';
   el('museum').hidden=!isMuseum;
-  el('journal').hidden=!isJournal;
+  el('moneyPage').hidden=!isMoney;
   el('subTopBar').hidden=isHome;
   el('backHome').hidden=isHome;
   el('dictionary').hidden=!isDict;
@@ -1011,7 +1073,7 @@ function route(){
   }
   if(isNews)openNewsPage();
   if(isMuseum)renderMuseum();
-  if(isJournal)openJournal(k);
+  if(isMoney)renderLedger();
   window.scrollTo(0,0);
 }
 
@@ -1291,24 +1353,26 @@ async function runSummary(target,photoIds,fromAuto,from=0,acc=null){
     while(pos<total){
       const end=Math.min(pos+AI_BATCH,total);
       const batch=photoIds.slice(pos,end);
-      summaryUi.prog.set(id,'AI가 사진을 읽고 요약하는 중이에요… ('+(pos+1)+(end>pos+1?'~'+end:'')+' / '+total+'장)');
+      summaryUi.prog.set(id,{done:pos,total,text:'AI가 사진을 읽고 요약하는 중이에요… ('+(pos+1)+(end>pos+1?'~'+end:'')+' / '+total+'장)'});
       refreshAfterSummary(target);
       try{
         const s=await requestSummary(batch,hint);
         articles=articles.concat(s.articles);
         pos=end;
+        summaryUi.prog.set(id,{done:pos,total,text:pos<total?('요약 진행 중… ('+pos+' / '+total+'장 완료)'):'요약을 마무리하는 중이에요…'});
         if(!saveSummary(target,{articles,done:pos}))throw new Error('msg:요약을 저장하지 못했어요.');
         refreshAfterSummary(target);
       }catch(err){
         const m=String(err&&err.message||'');
         if(m.startsWith('timeout:')&&batch.length>1){
           for(let j=0;j<batch.length;j++){
-            summaryUi.prog.set(id,'응답이 느려 1장씩 요약 중이에요… ('+(pos+1)+' / '+total+'장)');
+            summaryUi.prog.set(id,{done:pos,total,text:'응답이 느려 1장씩 요약 중이에요… ('+(pos+1)+' / '+total+'장)'});
             refreshAfterSummary(target);
             await new Promise(r=>setTimeout(r,1200));
             const s=await requestSummary([batch[j]],hint);
             articles=articles.concat(s.articles);
             pos++;
+            summaryUi.prog.set(id,{done:pos,total,text:'요약 진행 중… ('+pos+' / '+total+'장 완료)'});
             if(!saveSummary(target,{articles,done:pos}))throw new Error('msg:요약을 저장하지 못했어요.');
             refreshAfterSummary(target);
           }
@@ -1342,7 +1406,14 @@ function renderSummaryBlock(entry,target){
     wrap.append(box);
   }
   if(summaryUi.busy.has(entry.id)){
-    const b=node('p',summaryUi.prog.get(entry.id)||'AI가 사진을 읽고 요약하는 중이에요…');b.className='aiBusy';wrap.append(b);
+    const pr=summaryUi.prog.get(entry.id)||{done:0,total:1,text:'AI가 사진을 읽고 요약하는 중이에요…'};
+    const pct=pr.total?Math.min(100,Math.max(4,Math.round((pr.done/pr.total)*100))):10;
+    const pbox=node('div','');pbox.className='aiProgBox';
+    const top=node('div','');top.className='aiProgTop';
+    top.append(node('span',pr.text),node('span',pct+'%'));
+    const track=node('div','');track.className='aiProgTrack';
+    const fill=node('div','');fill.className='aiProgFill';fill.style.width=pct+'%';
+    track.append(fill);pbox.append(top,track);wrap.append(pbox);
   }else{
     const total=(entry.photoIds||[]).length;
     const done=typeof entry.summaryDone==='number'?entry.summaryDone:(entry.summary?total:0);
@@ -2111,6 +2182,71 @@ function renderMuseum(){
     grid.append(card);
   });
 }
+
+/* ---------- Monthly 31-Day Ledger (경제 관념 다듬기) ---------- */
+const LEDGER_KEY='taste-ledger-v1';
+const ledgerState={year:new Date().getFullYear(),month:new Date().getMonth()};
+function ledgerYm(){return ledgerState.year+'-'+String(ledgerState.month+1).padStart(2,'0')}
+function readLedgerAll(){const v=readJsonStore(LEDGER_KEY,{});return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}
+function ledgerNum(v){const n=Number(String(v||'').replace(/[^0-9]/g,''));return Number.isFinite(n)?n:0}
+function updateLedgerTotals(rows){
+  let inc=0,exp=0;
+  Object.values(rows||{}).forEach(r=>{if(r){inc+=ledgerNum(r.inc);exp+=ledgerNum(r.exp)}});
+  el('ledgerIncSum').textContent=inc.toLocaleString('ko-KR')+'원';
+  el('ledgerExpSum').textContent=exp.toLocaleString('ko-KR')+'원';
+  const net=inc-exp;
+  el('ledgerNetSum').textContent=(net>0?'+':'')+net.toLocaleString('ko-KR')+'원';
+}
+function renderLedger(){
+  const tbody=el('ledgerBody');if(!tbody)return;
+  tbody.replaceChildren();
+  const y=ledgerState.year,m=ledgerState.month,ym=ledgerYm();
+  el('ledgerMonthLabel').textContent=y+'년 '+(m+1)+'월';
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const today=todayStamp();
+  const all=readLedgerAll();
+  const rows=all[ym]&&typeof all[ym]==='object'?all[ym]:{};
+  const locked=document.body.classList.contains('viewer');
+  updateLedgerTotals(rows);
+  for(let d=1;d<=31;d++){
+    const tr=document.createElement('tr');
+    const ds=ym+'-'+String(d).padStart(2,'0');
+    if(ds===today)tr.className='todayRow';
+    else if(d>daysInMonth)tr.className='dimRow';
+    const tdDay=node('td',d+'일');tdDay.className='dayCol';
+    const rec=rows[String(d)]||{inc:'',exp:'',note:''};
+    const saveCell=(field,val)=>{
+      const curAll=readLedgerAll();
+      if(!curAll[ym]||typeof curAll[ym]!=='object')curAll[ym]={};
+      const r=curAll[ym][String(d)]||{inc:'',exp:'',note:''};
+      r[field]=val;
+      if(!r.inc&&!r.exp&&!r.note)delete curAll[ym][String(d)];else curAll[ym][String(d)]=r;
+      writeJsonStore(LEDGER_KEY,curAll);
+      updateLedgerTotals(curAll[ym]);
+      el('ledgerStatus').textContent='자동 저장됨';
+    };
+    const mkNum=(field,ph)=>{
+      const td=document.createElement('td');
+      const inp=document.createElement('input');inp.type='text';inp.inputMode='numeric';inp.className='num';
+      inp.placeholder=ph;inp.value=rec[field]?ledgerNum(rec[field]).toLocaleString('ko-KR'):'';
+      inp.disabled=locked;
+      inp.onfocus=()=>{if(inp.value)inp.value=String(ledgerNum(inp.value)||'')};
+      inp.onblur=()=>{const n=ledgerNum(inp.value);inp.value=n?n.toLocaleString('ko-KR'):'';saveCell(field,n?String(n):'')};
+      inp.oninput=()=>{const n=ledgerNum(inp.value);const copy={...rows,[String(d)]:{...(rows[String(d)]||{}),[field]:n?String(n):''}};updateLedgerTotals(copy)};
+      td.append(inp);return td;
+    };
+    const tdNote=document.createElement('td');
+    const noteInp=document.createElement('input');noteInp.type='text';noteInp.maxLength=120;
+    noteInp.placeholder='비고';noteInp.value=rec.note||'';noteInp.disabled=locked;
+    noteInp.onchange=()=>saveCell('note',noteInp.value.trim());
+    tdNote.append(noteInp);
+    tr.append(tdDay,mkNum('inc','0'),mkNum('exp','0'),tdNote);
+    tbody.append(tr);
+  }
+}
+el('ledgerPrev').onclick=()=>{ledgerState.month--;if(ledgerState.month<0){ledgerState.month=11;ledgerState.year--}renderLedger()};
+el('ledgerNext').onclick=()=>{ledgerState.month++;if(ledgerState.month>11){ledgerState.month=0;ledgerState.year++}renderLedger()};
+el('ledgerToday').onclick=()=>{const n=new Date();ledgerState.year=n.getFullYear();ledgerState.month=n.getMonth();renderLedger()};
 
 el('exportArchiveBtn').onclick=async()=>{
   const status=el('backupStatus');status.textContent='백업 파일을 만드는 중이에요…';
