@@ -6,5 +6,9 @@
     "api/analyze.js": {
       "maxDuration": 60
     }
-  }
+  },
+  "crons": [
+    { "path": "/api/quota-reset", "schedule": "5 7 * * *" },
+    { "path": "/api/quota-reset", "schedule": "5 8 * * *" }
+  ]
 }

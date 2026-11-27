@@ -125,6 +125,21 @@ async function callGemini(model, apiKey, images, hint) {
   return { status: res.status, json };
 }
 
+// Remember that today's (Pacific day) limit was hit, so the reset notification can be sent later.
+async function markDayLimit() {
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return;
+  const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  try {
+    await fetch(String(url).replace(/\/$/, ''), {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(['SET', 'ai:day-limit:' + day, '1', 'EX', '172800']),
+    });
+  } catch { /* notification is best-effort */ }
+}
+
 // Tells a per-minute limit (wait and retry) from a per-day limit (stop for today) using Gemini's error details.
 function quotaInfo(json) {
   const s = JSON.stringify(json || {});
@@ -236,9 +251,10 @@ module.exports = async function handler(req, res) {
       if (status === 429) {
         const info = quotaInfo(json);
         console.error('gemini quota', info.kind, info.retryAfter, model);
+        if (info.kind === 'day') await markDayLimit();
         return send(429, {
           error: info.kind === 'day'
-            ? 'AI 요약 하루 사용량이 다 찼어요. 내일 다시 쓸 수 있어요.'
+            ? 'AI 요약 하루 사용량이 다 찼어요. 한국 시간 오후 4~5시쯤 풀리고, 풀리면 휴대폰으로 알려 드릴게요.'
             : 'AI 요약 분당 사용량에 잠시 걸렸어요. 잠깐 쉬었다가 자동으로 이어갈게요.',
           kind: info.kind,
           retryAfter: info.retryAfter,

@@ -1363,8 +1363,10 @@ function refreshAfterSummary(target){
   }else renderNewsMemos();
 }
 const AI_STOP_KEY='ai-summary-stop-v1';
-function aiStoppedToday(){try{return localStorage.getItem(AI_STOP_KEY)===todayStamp()}catch{return false}}
-function stopAiToday(){try{localStorage.setItem(AI_STOP_KEY,todayStamp())}catch{}}
+// Gemini's daily limit resets at midnight Pacific time, so the "stopped for today" flag is keyed by the Pacific date.
+function aiPacificDay(){try{return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}catch{return todayStamp()}}
+function aiStoppedToday(){try{return localStorage.getItem(AI_STOP_KEY)===aiPacificDay()}catch{return false}}
+function stopAiToday(){try{localStorage.setItem(AI_STOP_KEY,aiPacificDay())}catch{}}
 function askQuotaChoice(message){
   return new Promise(resolve=>{
     const box=el('quotaBox');
