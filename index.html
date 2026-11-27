@@ -589,6 +589,16 @@ button.photoThumb:hover{border-color:var(--blue)}
     <p class="formNotice">3일이 지난 기록은 날짜별 PDF 파일로 정리돼요. 파일 이름은 ‘매체_날짜.pdf’예요.</p>
     <div id="newsFileList"></div>
   </section>
+  <section>
+    <h2>기간 PDF 한 번에 받기</h2>
+    <p class="formNotice">쌓아 둔 요약을 선택한 기간만큼 날짜순으로 묶어 PDF 한 개로 받아요.</p>
+    <div class="formRow2">
+      <label>시작 날짜<input type="date" id="rangeFrom"></label>
+      <label>끝 날짜<input type="date" id="rangeTo"></label>
+    </div>
+    <button type="button" id="rangePdfBtn" class="primary">이 기간 PDF 받기</button>
+    <p id="rangePdfStatus" role="status" class="formNotice"></p>
+  </section>
   <div class="stepNav"><button type="button" id="newsPrevToWrite">← 1. 기사 입력</button><button type="button" id="newsNextToFlow">다음: 3. 흐름 형성 →</button></div>
 </div>
 <div id="newsTabFlow" hidden>
@@ -1043,6 +1053,9 @@ function openNewsPage(){
   const f=el('newsMemoForm');
   if(f&&!f.elements.date.value)f.elements.date.value=todayStamp();
   renderNewsMemos();renderFlow();
+  const rt=el('rangeTo'),rf=el('rangeFrom');
+  if(rt&&!rt.value)rt.value=todayStamp();
+  if(rf&&!rf.value){const d=new Date();d.setDate(d.getDate()-6);rf.value=localDate(d)}
   if(!dictState.terms)dictLoad().then(()=>renderNewsMemos()).catch(()=>{});
 }
 
@@ -1632,6 +1645,7 @@ async function buildDayPdf(source,date,memos){
   write('신문 요약 · 기사 '+count+'건',24,'400','#6d6d69',28);
   for(const m of sorted){
     const arts=memoArticles(m);
+    write((m.date||'')+' · '+(m.source||'신문'),22,'700','#6d6d69',6);
     if(!arts.length)arts.push({title:'기사 캡처',summary:'(요약 없음)'});
     arts.forEach(a=>{
       if(a.title)write(a.title,30,'700','#11183c',4);
@@ -2251,6 +2265,19 @@ function renderLedger(){
     tbody.append(tr);
   }
 }
+el('rangePdfBtn').onclick=async()=>{
+  const from=el('rangeFrom').value,to=el('rangeTo').value,status=el('rangePdfStatus'),btn=el('rangePdfBtn');
+  if(!from||!to||from>to){status.textContent='시작 날짜와 끝 날짜를 확인해 주세요.';return}
+  const list=getNewsMemos().filter(m=>m.date&&m.date>=from&&m.date<=to);
+  if(!list.length){status.textContent='이 기간에 쌓인 요약이 없어요.';return}
+  btn.disabled=true;status.textContent='PDF를 만드는 중이에요… ('+list.length+'건)';
+  try{
+    if(!dictState.terms)await dictLoad().catch(()=>{});
+    downloadBlob(await buildDayPdf('신문 요약',from+' ~ '+to,list),'신문요약_'+from+'_'+to+'.pdf');
+    status.textContent='PDF를 받았어요. ('+list.length+'건)';
+  }catch{status.textContent='PDF를 만들지 못했어요. 잠시 뒤 다시 시도해 주세요.'}
+  finally{btn.disabled=false}
+};
 el('ledgerPrev').onclick=()=>{ledgerState.month--;if(ledgerState.month<0){ledgerState.month=11;ledgerState.year--}renderLedger()};
 el('ledgerNext').onclick=()=>{ledgerState.month++;if(ledgerState.month>11){ledgerState.month=0;ledgerState.year++}renderLedger()};
 el('ledgerToday').onclick=()=>{const n=new Date();ledgerState.year=n.getFullYear();ledgerState.month=n.getMonth();renderLedger()};
