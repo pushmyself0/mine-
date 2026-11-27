@@ -1649,6 +1649,15 @@ async function buildDayPdf(source,date,memos){
   let count=0;sorted.forEach(m=>{count+=Math.max(1,memoArticles(m).length)});
   write(source+' '+date,46,'700','#161616',4);
   write('신문 요약 · 기사 '+count+'건',24,'400','#6d6d69',28);
+  // 목차: every article title on the first page(s), so the whole batch can be scanned at a glance
+  const toc=[];
+  sorted.forEach(m=>{
+    const arts=memoArticles(m);
+    (arts.length?arts:[{title:'기사 캡처'}]).forEach(a=>toc.push({title:a.title||'(제목 없음)',date:m.date||''}));
+  });
+  write('목차',30,'700','#11183c',10);
+  toc.forEach((it,i)=>write((i+1)+'. '+it.title+'   ('+it.date+')',24,'400','#222222',6));
+  newPage();
   for(const m of sorted){
     const arts=memoArticles(m);
     write((m.date||'')+' · '+(m.source||'신문'),22,'700','#6d6d69',6);
