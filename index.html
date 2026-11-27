@@ -1315,7 +1315,11 @@ async function requestSummary(photoIds,hint){
   }catch{throw new Error('network')}
   let data={};try{data=await res.json()}catch{}
   if(res.status===401){sessionStorage.removeItem(AI_PASS_KEY);try{localStorage.removeItem('sync-pass-v1')}catch{}throw new Error('auth')}
-  if(res.status===429)throw new Error('quota:'+(data.error||'AI 요약 한도에 도달했어요.'));
+  if(res.status===429){
+    const qe=new Error('quota:'+(data.error||'AI 요약 한도에 도달했어요.'));
+    qe.quotaKind=data.kind||'unknown';qe.retryAfter=Number(data.retryAfter)||0;
+    throw qe;
+  }
   if(res.status===404||res.status===405||res.status===501)throw new Error('noserver');
   if(res.status===504||res.status===503||res.status===502)throw new Error('timeout:'+(data.error||('오류 '+res.status)));
   if(!res.ok)throw new Error('msg:'+(data.error||('오류 '+res.status)));
@@ -1401,7 +1405,7 @@ async function summarizeGroup(ids,hint,onRetry){
     }
   }
 }
-async function runSummary(target,photoIds,fromAuto,from=0,acc=null){
+async function runSummary(target,photoIds,fromAuto,from=0,acc=null,minuteWaits=0){
   const id=target.entryId;
   if(aiStoppedToday()){
     summaryUi.err.set(id,'오늘은 AI 요약을 멈췄어요. 내일 다시 요약할 수 있어요. 사진은 그대로 있어요.');
@@ -1430,9 +1434,20 @@ async function runSummary(target,photoIds,fromAuto,from=0,acc=null){
   }catch(err){
     const m=String(err&&err.message||'');
     if(m.startsWith('quota:')){
+      // Per-minute limit: wait and continue automatically (does not stop the whole day).
+      if(err.quotaKind==='minute'&&minuteWaits<6){
+        const secs=Math.max(5,err.retryAfter||60);
+        for(let s=secs;s>0;s--){
+          summaryUi.prog.set(id,{done:pos,total,text:'분당 사용량 한도라 '+s+'초 쉬었다가 자동으로 이어갈게요… ('+pos+' / '+total+'장 완료)'});
+          refreshAfterSummary(target);
+          await sleepMs(1000);
+        }
+        return await runSummary(target,photoIds,fromAuto,pos,articles,minuteWaits+1);
+      }
+      // Per-day (or unknown) limit: ask the user, then stop for today if they decline.
       summaryUi.busy.delete(id);summaryUi.prog.delete(id);refreshAfterSummary(target);
       const choice=await askQuotaChoice(m.slice(6));
-      if(choice==='retry'){summaryUi.busy.delete(id);return await runSummary(target,photoIds,fromAuto,pos,articles)}
+      if(choice==='retry'){summaryUi.busy.delete(id);return await runSummary(target,photoIds,fromAuto,pos,articles,0)}
       stopAiToday();
       summaryUi.err.set(id,'오늘은 AI 요약을 멈췄어요. 내일 다시 요약할 수 있어요. 사진은 그대로 있어요.');
     }else summaryUi.err.set(id,summaryErrorText(err));

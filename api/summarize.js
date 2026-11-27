@@ -125,6 +125,17 @@ async function callGemini(model, apiKey, images, hint) {
   return { status: res.status, json };
 }
 
+// Tells a per-minute limit (wait and retry) from a per-day limit (stop for today) using Gemini's error details.
+function quotaInfo(json) {
+  const s = JSON.stringify(json || {});
+  let kind = 'unknown';
+  if (/PerDay/i.test(s)) kind = 'day';
+  else if (/PerMinute/i.test(s)) kind = 'minute';
+  const m = s.match(/retryDelay\\?"\s*:\s*\\?"(\d+(?:\.\d+)?)s/);
+  const retryAfter = m ? Math.ceil(Number(m[1])) : (kind === 'minute' ? 60 : 0);
+  return { kind, retryAfter };
+}
+
 function extractText(json) {
   const cand = json && json.candidates && json.candidates[0];
   const parts = cand && cand.content && cand.content.parts;
@@ -222,7 +233,17 @@ module.exports = async function handler(req, res) {
       }
       const { status, json } = attempt;
       if (status === 404) { last = { status, json, model }; continue; }
-      if (status === 429) return send(429, { error: 'AI 요약 사용량 한도에 걸렸어요. 잠시 뒤에 다시 시도해 주세요.' });
+      if (status === 429) {
+        const info = quotaInfo(json);
+        console.error('gemini quota', info.kind, info.retryAfter, model);
+        return send(429, {
+          error: info.kind === 'day'
+            ? 'AI 요약 하루 사용량이 다 찼어요. 내일 다시 쓸 수 있어요.'
+            : 'AI 요약 분당 사용량에 잠시 걸렸어요. 잠깐 쉬었다가 자동으로 이어갈게요.',
+          kind: info.kind,
+          retryAfter: info.retryAfter,
+        });
+      }
       if (status === 504) return send(504, { error: 'AI 응답이 늦어졌어요. 자동으로 다시 시도해요.' });
       if (status === 400 || status === 401 || status === 403) {
         const msg = json && json.error && json.error.message ? String(json.error.message) : '';
