@@ -315,6 +315,13 @@ body.viewer #newsTabBtnWrite,body.viewer #newsTabWrite,body.viewer #newsNextToLi
 .fileRow .fname{flex:1;min-width:160px;font-weight:600;overflow-wrap:anywhere}
 .fileRow small{color:var(--muted)}
 .fileRow button{padding:5px 12px;font-size:13px}
+.fileRow.todayPdfAll{margin-top:8px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fafaf8}
+dialog.pdfDlg{width:min(860px,96vw);max-height:92vh;padding:0;overflow:hidden;border-radius:12px}
+dialog.pdfDlg .pdfHead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line);background:#fff}
+dialog.pdfDlg .pdfHead strong{font-size:15px;overflow-wrap:anywhere}
+dialog.pdfDlg .pdfActs{display:flex;gap:8px;flex-wrap:wrap}
+dialog.pdfDlg .pdfBody{padding:18px;background:#f2f2ee;overflow:auto;max-height:calc(92vh - 68px)}
+dialog.pdfDlg .pdfBody img{display:block;width:100%;max-width:780px;height:auto;margin:0 auto 14px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.08);border-radius:4px}
 .flowMine{margin:12px 0}
 .flowMine summary{font-weight:650}
 .flowMine textarea{min-height:56px;width:100%}
@@ -576,8 +583,12 @@ button.photoThumb:hover{border-color:var(--blue)}
   <section>
     <h2>오늘의 요약</h2>
     <p id="newsMemoStatus" role="status"></p>
-    <div id="todayPdfBar"></div>
     <div id="newsMemoList"></div>
+  </section>
+  <section id="todayPdfSection">
+    <h2>오늘의 기사 요약 PDF들</h2>
+    <p class="formNotice">4장씩 요약할 때마다 묶음별 PDF가 여기에 하나씩 생성돼요. 밤 11시 59분이 지나 다음 날이 되면 오늘 쌓인 PDF들이 하루치 한 개로 합쳐져 아래 ‘지나간 기록’으로 넘어가요.</p>
+    <div id="todayPdfBar"></div>
   </section>
   <section>
     <h2>최근 3일 정리본</h2>
@@ -585,8 +596,8 @@ button.photoThumb:hover{border-color:var(--blue)}
     <div id="newsRecentList"></div>
   </section>
   <section>
-    <h2>3일 지난 기록 (PDF 파일)</h2>
-    <p class="formNotice">3일이 지난 기록은 날짜별 PDF 파일로 정리돼요. 파일 이름은 ‘매체_날짜.pdf’예요.</p>
+    <h2>지나간 기록 (날짜별 통합 PDF)</h2>
+    <p class="formNotice">밤 11시 59분이 지나 다음 날이 되면, 그날 올린 묶음 PDF들이 날짜당 하나의 통합 PDF로 합쳐져 여기에 쌓여요.</p>
     <div id="newsFileList"></div>
   </section>
   <section>
@@ -718,6 +729,17 @@ button.photoThumb:hover{border-color:var(--blue)}
 <dialog id="taskBox"><form id="taskForm"><h2>과제 추가</h2><details><summary>한 줄로 입력</summary><label>과목 · 날짜 · 할 일<input id="quick" placeholder="약리학 다음 주 수요일 수업 전까지 질문 하나"></label><button type="button" id="parse">입력칸에 채우기</button><p id="hint"></p></details><label>과목<input name="subject" list="subjects" required maxlength="80"></label><datalist id="subjects"></datalist><label>할 일<input name="title" placeholder="발표 질문 1개 제출" required maxlength="220"></label><label>마감 · 미정이면 비워두세요<input type="datetime-local" name="due"></label><label>캘린더 알림<select name="lead"><option value="1440">하루 전</option><option value="60">1시간 전</option><option value="10">10분 전</option></select></label><button>저장</button> <button type="button" onclick="taskBox.close()">닫기</button></form></dialog>
 <dialog id="museumWriteBox" class="museumDlg"><form id="museumForm"><h2 id="museumFormTitle">박물관에 새 글 전시하기</h2><div class="formRow2"><label>날짜<input type="date" name="date" required></label><label>감정·분위기 (선택)<input name="mood" placeholder="예: 차분함, 설렘, 다짐" maxlength="30"></label></div><label>제목<input name="title" placeholder="오늘의 기록 제목" required maxlength="120"></label><label class="photoPick">사진 추가 (선택 · 여러 장 가능)<input type="file" name="photos" accept="image/*" multiple></label><div id="museumPhotoPreview" class="photoGrid"></div><label>내 심경<textarea name="body" rows="6" placeholder="오늘 느낀 생각과 마음, 기억해 두고 싶은 장면을 자유롭게 적어 보세요." maxlength="8000"></textarea></label><p id="museumFormStatus" role="status" class="formNotice"></p><div class="museumDlgAct"><button type="button" id="museumWriteCancel">취소</button><button type="submit" class="primary">전시하기</button></div></form></dialog>
 <dialog id="museumReadBox" class="museumDlg"><article id="museumReadBody"></article></dialog>
+<dialog id="pdfViewBox" class="pdfDlg">
+  <div class="pdfHead">
+    <strong id="pdfViewTitle">PDF 미리보기</strong>
+    <div class="pdfActs">
+      <button type="button" id="pdfViewTab">새 탭으로 열기</button>
+      <button type="button" id="pdfViewSave">PDF 저장</button>
+      <button type="button" id="pdfViewClose" class="primary">닫기</button>
+    </div>
+  </div>
+  <div id="pdfViewBody" class="pdfBody"></div>
+</dialog>
 <script>
 const key='campus-note-v1', weekdays='일월화수목금토', el=id=>document.getElementById(id);
 let state=JSON.parse(localStorage.getItem(key)||'{"courses":[],"tasks":[],"daily":"18:00"}');
@@ -1628,7 +1650,7 @@ function makePdf(imgs){
   add(x+'trailer\n<< /Size '+(total+1)+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF\n');
   return new Blob(chunks,{type:'application/pdf'});
 }
-async function buildDayPdf(source,date,memos){
+async function renderDayPdfPages(source,date,memos){
   const pages=[];let cv,ctx,y=0;
   const newPage=()=>{
     cv=document.createElement('canvas');cv.width=PDF_W;cv.height=PDF_H;
@@ -1678,23 +1700,50 @@ async function buildDayPdf(source,date,memos){
     const g=c.getContext('2d');g.font='400 20px '+PDF_FONT;g.fillStyle='#9b9b94';g.textBaseline='top';g.textAlign='right';
     g.fillText('알로하 · '+source+' '+date+' · '+(i+1)+'/'+pages.length,PDF_W-PDF_M,PDF_H-PDF_M+20);
   });
-  const imgs=[];
+  const imgs=[],pageUrls=[];
   for(const c of pages){
     const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.85));
+    pageUrls.push(URL.createObjectURL(blob));
     imgs.push({data:new Uint8Array(await blob.arrayBuffer()),w:c.width,h:c.height});
   }
-  return makePdf(imgs);
+  return {blob:makePdf(imgs),pageUrls};
 }
-async function exportDayPdf(source,date,memos,btn){
+async function buildDayPdf(source,date,memos){
+  const res=await renderDayPdfPages(source,date,memos);
+  res.pageUrls.forEach(u=>URL.revokeObjectURL(u));
+  return res.blob;
+}
+let pdfViewClean=null;
+async function openPdfViewer(source,date,memos,fileName,btn){
+  const label=btn?btn.textContent:'';if(btn){btn.disabled=true;btn.textContent='여는 중…'}
+  try{
+    if(!dictState.terms)await dictLoad().catch(()=>{});
+    const {blob,pageUrls}=await renderDayPdfPages(source,date,memos);
+    const pdfUrl=URL.createObjectURL(blob);
+    if(pdfViewClean)pdfViewClean();
+    pdfViewClean=()=>{URL.revokeObjectURL(pdfUrl);pageUrls.forEach(u=>URL.revokeObjectURL(u));pdfViewClean=null};
+    el('pdfViewTitle').textContent=fileName;
+    const body=el('pdfViewBody');body.replaceChildren();
+    pageUrls.forEach((u,i)=>{const img=document.createElement('img');img.src=u;img.alt=fileName+' '+(i+1)+'쪽';body.append(img)});
+    el('pdfViewTab').onclick=()=>window.open(pdfUrl,'_blank','noopener');
+    el('pdfViewSave').onclick=()=>downloadBlob(blob,fileName);
+    const dlg=el('pdfViewBox');
+    el('pdfViewClose').onclick=()=>dlg.close();
+    dlg.onclose=()=>{if(pdfViewClean)pdfViewClean()};
+    dlg.showModal();
+  }catch{alert('PDF를 열지 못했어요. 잠시 뒤 다시 시도해 주세요.')}
+  finally{if(btn){btn.disabled=false;btn.textContent=label}}
+}
+async function exportDayPdf(source,date,memos,btn,fileName){
   const label=btn.textContent;btn.disabled=true;btn.textContent='만드는 중…';
   try{
     if(!dictState.terms)await dictLoad().catch(()=>{});
-    downloadBlob(await buildDayPdf(source,date,memos),safeFileName(source)+'_'+date+'.pdf');
+    downloadBlob(await buildDayPdf(source,date,memos),fileName||(safeFileName(source)+'_'+date+'.pdf'));
   }catch{alert('PDF를 만들지 못했어요. 잠시 뒤 다시 시도해 주세요.')}
   finally{btn.disabled=false;btn.textContent=label}
 }
 
-/* ---------- summary tab: recent (<=3 days) and files (>3 days) ---------- */
+/* ---------- summary tab: recent (<=3 days) and past unified PDFs ---------- */
 function renderRecentMemos(memos){
   const box=el('newsRecentList');box.replaceChildren();
   if(!memos.length){const p=node('p','하루 전~3일 전에 쌓인 요약이 없어요.');p.className='formNotice';box.append(p);return}
@@ -1705,9 +1754,14 @@ function renderRecentMemos(memos){
     let count=0;list.forEach(m=>{count+=Math.max(1,memoArticles(m).length)});
     const sources=[...new Set(list.map(m=>m.source).filter(Boolean))].join(', ');
     det.append(node('summary',date+' · 기사 '+count+'건'+(sources?' · '+sources:'')));
-    const pdfBtn=button('PDF 받기 ('+safeFileName(sources||'신문')+'_'+date+'.pdf)',()=>exportDayPdf(sources||'신문',date,list,pdfBtn));
-    pdfBtn.type='button';pdfBtn.style.marginTop='10px';pdfBtn.style.fontSize='13px';
-    det.append(pdfBtn);
+    const fname=safeFileName(sources||'신문')+'_'+date+'.pdf';
+    const actRow=node('div','');actRow.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:10px';
+    const viewBtn=button('통합 PDF 보기',()=>openPdfViewer(sources||'신문',date,list,fname,viewBtn));
+    viewBtn.type='button';viewBtn.className='primary';viewBtn.style.fontSize='13px';
+    const pdfBtn=button('저장',()=>exportDayPdf(sources||'신문',date,list,pdfBtn,fname));
+    pdfBtn.type='button';pdfBtn.style.fontSize='13px';
+    actRow.append(viewBtn,pdfBtn);
+    det.append(actRow);
     list.forEach(m=>{
       const item=node('div','');item.className='dayItem';
       const arts=memoArticles(m);
@@ -1728,17 +1782,26 @@ function renderRecentMemos(memos){
 }
 function renderNewsFiles(memos){
   const box=el('newsFileList');box.replaceChildren();
-  if(!memos.length){const p=node('p','3일이 지난 기록은 아직 없어요. 3일이 지나면 날짜별 PDF 파일로 여기에 정리돼요.');p.className='formNotice';box.append(p);return}
-  const groups=new Map();
-  memos.forEach(m=>{const date=m.date||'날짜없음',source=m.source||'신문',k=date+'|'+source;if(!groups.has(k))groups.set(k,{date,source,list:[]});groups.get(k).list.push(m)});
-  const rows=[...groups.values()].sort((a,b)=>b.date.localeCompare(a.date)||a.source.localeCompare(b.source));
+  if(!memos.length){const p=node('p','아직 지나간 기록이 없어요. 오늘 밤 11시 59분이 지나면 오늘 쌓인 PDF들이 하루치 한 개로 합쳐져 여기에 나타나요.');p.className='formNotice';box.append(p);return}
+  const byDate=new Map();
+  memos.forEach(m=>{
+    const date=m.date||'날짜없음';
+    if(!byDate.has(date))byDate.set(date,{date,list:[]});
+    byDate.get(date).list.push(m);
+  });
+  const rows=[...byDate.values()].sort((a,b)=>b.date.localeCompare(a.date));
   rows.slice(0,filesShown).forEach(g=>{
     let count=0;g.list.forEach(m=>{count+=Math.max(1,memoArticles(m).length)});
+    const srcList=[...new Set(g.list.map(m=>m.source).filter(Boolean))];
+    const source=srcList.length===1?srcList[0]:(srcList.length>1?'신문요약':'신문');
+    const fname=safeFileName(source)+'_'+g.date+'.pdf';
     const row=node('div','');row.className='fileRow';
-    const name=node('span',safeFileName(g.source)+'_'+g.date+'.pdf');name.className='fname';
-    row.append(name,node('small','기사 '+count+'건'));
-    const b=button('PDF 받기',()=>exportDayPdf(g.source,g.date,g.list,b));b.type='button';
-    row.append(b);box.append(row);
+    const name=node('span',fname);name.className='fname';
+    const detail=g.list.length>1?('묶음 '+g.list.length+'개 합침 · 기사 '+count+'건'):('기사 '+count+'건');
+    row.append(name,node('small',detail));
+    const viewBtn=button('PDF 보기',()=>openPdfViewer(source,g.date,g.list,fname,viewBtn));viewBtn.type='button';viewBtn.className='primary';
+    const saveBtn=button('저장',()=>exportDayPdf(source,g.date,g.list,saveBtn,fname));saveBtn.type='button';
+    row.append(viewBtn,saveBtn);box.append(row);
   });
   if(rows.length>filesShown){
     const more=button('더 보기 ('+(rows.length-filesShown)+'개 더)',()=>{filesShown+=12;renderNewsMemos()});
@@ -1895,7 +1958,7 @@ function renderNewsMemos(){
   const all=getNewsMemos().slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const today=all.filter(m=>daysAgo(m.date)<=0);
   const recent=all.filter(m=>{const d=daysAgo(m.date);return d>=1&&d<=3});
-  const old=all.filter(m=>daysAgo(m.date)>3);
+  const past=all.filter(m=>daysAgo(m.date)>=1);
   el('newsMemoStatus').textContent=!all.length?'아직 기록한 신문 요약이 없어요. 오늘 읽은 기사 캡처부터 올려 보세요.':(today.length?'오늘 '+today.length+'건 · 전체 '+all.length+'건이 쌓였어요.':'오늘 기록한 요약은 아직 없어요. (전체 '+all.length+'건)');
   el('newsTabBtnLine').textContent=all.length?'2. 요약 ('+all.length+')':'2. 요약';
   const flowDates=all.map(m=>m.date).filter(Boolean).sort();
@@ -1903,27 +1966,51 @@ function renderNewsMemos(){
   const list=el('newsMemoList');list.replaceChildren();
   const pdfBar=el('todayPdfBar');if(pdfBar){
     pdfBar.replaceChildren();
-    const groups=new Map();
-    today.forEach(m=>{
-      if(!memoArticles(m).length)return;
-      const date=m.date||todayStamp(),source=m.source||'신문',k=date+'|'+source;
-      if(!groups.has(k))groups.set(k,{date,source,list:[]});
-      groups.get(k).list.push(m);
-    });
-    for(const g of groups.values()){
-      let count=0;g.list.forEach(m=>{count+=Math.max(1,memoArticles(m).length)});
-      const row=node('div','');row.className='fileRow';
-      const name=node('span',safeFileName(g.source)+'_'+g.date+'.pdf');name.className='fname';
-      row.append(name,node('small','기사 '+count+'건'));
-      const b=button('PDF 받기',()=>exportDayPdf(g.source,g.date,g.list,b));b.type='button';b.className='primary';
-      row.append(b);pdfBar.append(row);
+    const batches=today.filter(m=>memoArticles(m).length>0).slice().reverse();
+    if(!batches.length){
+      const p=node('p','아직 오늘 생성된 PDF가 없어요. 기사를 올리고 요약이 끝나면 여기에 묶음별 PDF가 하나씩 생겨요.');
+      p.className='formNotice';pdfBar.append(p);
+    }else{
+      let totalArts=0;
+      batches.forEach((m,idx)=>{
+        const arts=memoArticles(m),cnt=arts.length;totalArts+=cnt;
+        const date=m.date||todayStamp(),source=m.source||'신문',nth=(idx+1)+'차';
+        const fname=safeFileName(source)+'_'+date+'_'+nth+'.pdf';
+        const row=node('div','');row.className='fileRow';
+        const name=node('span',nth+' · '+fname);name.className='fname';
+        const photoCnt=Array.isArray(m.photoIds)&&m.photoIds.length?('사진 '+m.photoIds.length+'장 · '):'';
+        row.append(name,node('small',photoCnt+'기사 '+cnt+'건'));
+        const viewBtn=button('PDF 보기',()=>openPdfViewer(source,date+' ('+nth+')',[m],fname,viewBtn));viewBtn.type='button';viewBtn.className='primary';
+        const saveBtn=button('저장',()=>exportDayPdf(source,date,[m],saveBtn,fname));saveBtn.type='button';
+        row.append(viewBtn,saveBtn);pdfBar.append(row);
+      });
+      if(batches.length>1){
+        const date=todayStamp();
+        const srcList=[...new Set(batches.map(m=>m.source).filter(Boolean))];
+        const source=srcList.length===1?srcList[0]:'신문요약';
+        const allName=safeFileName(source)+'_'+date+'.pdf';
+        const allRow=node('div','');allRow.className='fileRow todayPdfAll';
+        const name=node('span','오늘 전체 합쳐서 미리보기 ('+allName+')');name.className='fname';
+        allRow.append(name,node('small','묶음 '+batches.length+'개 · 기사 '+totalArts+'건'));
+        const allList=batches.slice().reverse();
+        const vAll=button('한 번에 보기',()=>openPdfViewer(source,date,allList,allName,vAll));vAll.type='button';vAll.className='primary';
+        const sAll=button('저장',()=>exportDayPdf(source,date,allList,sAll,allName));sAll.type='button';
+        allRow.append(vAll,sAll);pdfBar.append(allRow);
+      }
     }
   }
   today.forEach(m=>list.append(newsCard(m)));
   renderRecentMemos(recent);
-  renderNewsFiles(old);
+  renderNewsFiles(past);
   renderFlowCount();
 }
+let midnightTimer=null;
+function scheduleMidnightRefresh(){
+  if(midnightTimer)clearTimeout(midnightTimer);
+  const now=new Date(),next=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,2);
+  midnightTimer=setTimeout(()=>{renderNewsMemos();scheduleMidnightRefresh()},Math.max(5000,next-now));
+}
+scheduleMidnightRefresh();
 el('newsMemoForm').onsubmit=async e=>{
   e.preventDefault();
   const f=e.target.elements,status=el('newsFormStatus');
