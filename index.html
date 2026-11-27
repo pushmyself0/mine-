@@ -1351,7 +1351,34 @@ function askQuotaChoice(message){
     box.showModal();
   });
 }
-const AI_BATCH=1;
+const AI_BATCH=4;
+const sleepMs=ms=>new Promise(r=>setTimeout(r,ms));
+// Summarize a group of photos. If the AI is slow (timeout), split the group in half and retry each half.
+async function summarizeGroup(ids,hint,onRetry){
+  for(let tries=0;tries<3;tries++){
+    try{
+      const s=await requestSummary(ids,hint);
+      return s.articles;
+    }catch(err){
+      const m=String(err&&err.message||'');
+      const retryable=m.startsWith('timeout:')||m==='network';
+      if(!retryable)throw err;
+      if(ids.length>1){
+        onRetry&&onRetry('응답이 늦어 '+ids.length+'장을 나눠서 요약하는 중이에요…');
+        const mid=Math.ceil(ids.length/2);
+        const first=await summarizeGroup(ids.slice(0,mid),hint,onRetry);
+        const second=await summarizeGroup(ids.slice(mid),hint,onRetry);
+        return first.concat(second);
+      }
+      if(tries<2){
+        onRetry&&onRetry('응답이 늦어 다시 시도하는 중이에요… ('+(tries+2)+'차)');
+        await sleepMs(2000*(tries+1));
+        continue;
+      }
+      throw err;
+    }
+  }
+}
 async function runSummary(target,photoIds,fromAuto,from=0,acc=null){
   const id=target.entryId;
   if(aiStoppedToday()){
@@ -1366,38 +1393,17 @@ async function runSummary(target,photoIds,fromAuto,from=0,acc=null){
   const hint=hintFor(target);
   try{
     while(pos<total){
-      const photoId=photoIds[pos];
-      let s=null,lastErr=null;
-      for(let tries=0;tries<4;tries++){
-        summaryUi.prog.set(id,{
-          done:pos,
-          total,
-          text:tries===0
-            ?('AI가 사진을 1장씩 요약하는 중이에요… ('+(pos+1)+' / '+total+'장)')
-            :('응답이 느려 다시 시도하는 중이에요… ('+(pos+1)+' / '+total+'장 · '+(tries+1)+'차 시도)')
-        });
-        refreshAfterSummary(target);
-        try{
-          s=await requestSummary([photoId],hint);
-          lastErr=null;
-          break;
-        }catch(err){
-          lastErr=err;
-          const m=String(err&&err.message||'');
-          if((m.startsWith('timeout:')||m==='network')&&tries<3){
-            await new Promise(r=>setTimeout(r,2000*(tries+1)));
-            continue;
-          }
-          throw err;
-        }
-      }
-      if(lastErr)throw lastErr;
-      articles=articles.concat(s.articles);
-      pos++;
+      const end=Math.min(pos+AI_BATCH,total);
+      const ids=photoIds.slice(pos,end);
+      const setProg=text=>{summaryUi.prog.set(id,{done:pos,total,text});refreshAfterSummary(target)};
+      setProg('사진 '+(pos+1)+'~'+end+' / '+total+'장을 요약하는 중이에요…');
+      const arts=await summarizeGroup(ids,hint,setProg);
+      articles=articles.concat(arts);
+      pos=end;
       summaryUi.prog.set(id,{done:pos,total,text:pos<total?('요약 진행 중… ('+pos+' / '+total+'장 완료)'):'요약을 마무리하는 중이에요…'});
       if(!saveSummary(target,{articles,done:pos}))throw new Error('msg:요약을 저장하지 못했어요.');
       refreshAfterSummary(target);
-      if(pos<total)await new Promise(r=>setTimeout(r,400));
+      if(pos<total)await sleepMs(400);
     }
   }catch(err){
     const m=String(err&&err.message||'');
