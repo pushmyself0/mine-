@@ -1441,7 +1441,9 @@ async function runSummary(target,photoIds,fromAuto,from=0,acc=null){
 }
 function renderSummaryBlock(entry,target){
   const wrap=node('div','');
-  const list=Array.isArray(entry.articles)&&entry.articles.length?entry.articles:(entry.summary?[{title:'',summary:entry.summary}]:[]);
+  const rawList=Array.isArray(entry.articles)&&entry.articles.length?entry.articles:(entry.summary?[{title:'',summary:entry.summary}]:[]);
+  const list=[];
+  rawList.forEach(a=>{if(!a||!a.summary)return;const f=!a.title?salvageRawArticles(a.summary):null;if(f)list.push(...f);else list.push(a)});
   if(list.length){
     const box=node('div','');box.className='aiSummary';
     box.append(node('small','AI 요약 · 기사 '+list.length+'건 (흐름 형성 로우 데이터로 자동 연결돼요)'));
@@ -1593,9 +1595,42 @@ function daysAgo(ds){
   const a=new Date(ds+'T00:00:00'),b=new Date(todayStamp()+'T00:00:00');
   return Math.round((b-a)/86400000);
 }
+function salvageRawArticles(text){
+  const clean=String(text||'').replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/i,'').trim();
+  if(!/^\s*[\[{]/.test(clean)||!/"summary"\s*:/.test(clean))return null;
+  try{const p=JSON.parse(clean);if(Array.isArray(p))return p.filter(a=>a&&a.summary).map(a=>({title:String(a.title||''),summary:String(a.summary||'')}))}catch{}
+  const out=[];let inStr=false,esc=false,depth=0,start=-1;
+  for(let i=0;i<clean.length;i++){
+    const ch=clean[i];
+    if(inStr){if(esc)esc=false;else if(ch==='\\')esc=true;else if(ch==='"')inStr=false;continue}
+    if(ch==='"'){inStr=true;continue}
+    if(ch==='{'){if(depth===0)start=i;depth++}
+    else if(ch==='}'&&depth>0){
+      depth--;
+      if(depth===0&&start>=0){
+        try{const o=JSON.parse(clean.slice(start,i+1));if(o&&o.summary)out.push({title:String(o.title||''),summary:String(o.summary||'')})}catch{}
+        start=-1;
+      }
+    }
+  }
+  return out.length?out:null;
+}
 function memoArticles(m){
-  if(Array.isArray(m.articles)&&m.articles.length)return m.articles.filter(a=>a&&a.summary).map(a=>({title:a.title||'',summary:a.summary}));
-  if(m.summary)return [{title:m.title||m.aiTitle||'',summary:m.summary}];
+  if(Array.isArray(m.articles)&&m.articles.length){
+    const out=[];
+    m.articles.forEach(a=>{
+      if(!a||!a.summary)return;
+      const fixed=!a.title?salvageRawArticles(a.summary):null;
+      if(fixed)out.push(...fixed);
+      else out.push({title:a.title||'',summary:a.summary});
+    });
+    if(out.length)return out;
+  }
+  if(m.summary){
+    const fixed=salvageRawArticles(m.summary);
+    if(fixed)return fixed;
+    return [{title:m.title||m.aiTitle||'',summary:m.summary}];
+  }
   if(m.note)return [{title:m.title||'기사 메모',summary:m.note}];
   return m.title?[{title:m.title,summary:''}]:[];
 }

@@ -88,7 +88,7 @@ async function callGemini(model, apiKey, images, hint) {
   const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent';
   const genCfg = {
     temperature: 0.3,
-    maxOutputTokens: 4096,
+    maxOutputTokens: 8192,
     responseMimeType: 'application/json',
     responseSchema: {
       type: 'ARRAY',
@@ -130,6 +130,42 @@ function extractText(json) {
   const parts = cand && cand.content && cand.content.parts;
   if (!Array.isArray(parts)) return '';
   return parts.filter((p) => p && !p.thought && typeof p.text === 'string').map((p) => p.text).join('').trim();
+}
+
+// Parse JSON array of {title, summary}, recovering complete items if output was truncated mid-JSON.
+function parseArticlesJson(raw) {
+  const clean = String(raw || '').replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  try {
+    const p = JSON.parse(clean);
+    if (Array.isArray(p)) return p;
+    if (p && typeof p === 'object' && typeof p.summary === 'string') return [p];
+  } catch {}
+  const items = [];
+  let inStr = false, esc = false, depth = 0, start = -1;
+  for (let i = 0; i < clean.length; i++) {
+    const ch = clean[i];
+    if (inStr) {
+      if (esc) esc = false;
+      else if (ch === '\\') esc = true;
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') { inStr = true; continue; }
+    if (ch === '{') { if (depth === 0) start = i; depth++; }
+    else if (ch === '}' && depth > 0) {
+      depth--;
+      if (depth === 0 && start >= 0) {
+        try {
+          const obj = JSON.parse(clean.slice(start, i + 1));
+          if (obj && typeof obj === 'object' && typeof obj.summary === 'string') items.push(obj);
+        } catch {}
+        start = -1;
+      }
+    }
+  }
+  if (items.length) return items;
+  if (/^\s*[\[{]/.test(clean) && /"summary"\s*:/.test(clean)) return [];
+  return clean ? [{ title: '', summary: clean }] : [];
 }
 
 module.exports = async function handler(req, res) {
@@ -204,15 +240,10 @@ module.exports = async function handler(req, res) {
       }
       const text = extractText(json);
       if (!text) return send(502, { error: 'AI가 요약을 만들지 못했어요. 다시 시도해 주세요.' });
-      let parsed = null;
-      try { parsed = JSON.parse(text); } catch { parsed = null; }
-      let items = [];
-      if (Array.isArray(parsed)) items = parsed;
-      else if (parsed && typeof parsed === 'object' && typeof parsed.summary === 'string') items = [parsed];
-      else items = [{ title: '', summary: text }];
+      const items = parseArticlesJson(text);
       const articles = items
         .filter((a) => a && typeof a === 'object' && typeof a.summary === 'string' && a.summary.trim())
-        .slice(0, 8)
+        .slice(0, 16)
         .map((a) => ({
           title: typeof a.title === 'string' ? a.title.trim().slice(0, 120) : '',
           summary: a.summary.trim().slice(0, 1000),
