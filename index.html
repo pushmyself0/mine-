@@ -1600,8 +1600,23 @@ function memoArticles(m){
   return m.title?[{title:m.title,summary:''}]:[];
 }
 function noteIsSeparate(m){return !!(m.note&&((Array.isArray(m.articles)&&m.articles.length)||m.summary))}
-function deleteNewsMemo(m){
-  if(!confirm('이 기사 메모를 삭제할까요?'))return;
+function isMemoSummaryDone(m){
+  if(summaryUi.busy.has(m.id)||summaryUi.err.has(m.id))return false;
+  const total=Array.isArray(m.photoIds)?m.photoIds.length:0;
+  if(!total)return memoArticles(m).length>0;
+  const done=typeof m.summaryDone==='number'?m.summaryDone:(m.summary?total:0);
+  return done>=total&&memoArticles(m).length>0;
+}
+function hideNewsMemoFromFeed(m){
+  const memos=getNewsMemos();
+  const t=memos.find(v=>v.id===m.id);
+  if(!t)return;
+  t.hiddenInFeed=true;
+  writeJsonStore(NEWS_MEMO_KEY,memos);
+  renderNewsMemos();
+}
+function deleteNewsMemo(m,msg){
+  if(!confirm(msg||'이 기사 메모를 삭제할까요?'))return;
   writeJsonStore(NEWS_MEMO_KEY,getNewsMemos().filter(v=>v.id!==m.id));
   photoDeleteMany(m.photoIds);
   renderNewsMemos();
@@ -1930,7 +1945,8 @@ function newsCard(m){
   const card=node('div','');card.className='newsCard';
   const head=node('div','');head.className='newsCardHead';
   head.append(node('h4',m.title||'기사 캡처 메모'));
-  const del=button('삭제',()=>deleteNewsMemo(m));
+  const hasSum=memoArticles(m).length>0;
+  const del=button(hasSum?'목록에서 지우기':'삭제',()=>hasSum?hideNewsMemoFromFeed(m):deleteNewsMemo(m));
   del.type='button';del.className='artDel';
   head.append(del);
   card.append(head);
@@ -1959,14 +1975,15 @@ function renderNewsMemos(){
   const today=all.filter(m=>daysAgo(m.date)<=0);
   const recent=all.filter(m=>{const d=daysAgo(m.date);return d>=1&&d<=3});
   const past=all.filter(m=>daysAgo(m.date)>=1);
-  el('newsMemoStatus').textContent=!all.length?'아직 기록한 신문 요약이 없어요. 오늘 읽은 기사 캡처부터 올려 보세요.':(today.length?'오늘 '+today.length+'건 · 전체 '+all.length+'건이 쌓였어요.':'오늘 기록한 요약은 아직 없어요. (전체 '+all.length+'건)');
+  const batches=today.filter(m=>memoArticles(m).length>0).slice().reverse();
+  const activeToday=today.filter(m=>!isMemoSummaryDone(m)&&!m.hiddenInFeed);
+  el('newsMemoStatus').textContent=!all.length?'아직 기록한 신문 요약이 없어요. 오늘 읽은 기사 캡처부터 올려 보세요.':(activeToday.length?'요약 진행/대기 중 '+activeToday.length+'건 · 아래에 완료된 PDF '+batches.length+'개가 정리돼 있어요.':(batches.length?'오늘 요약이 끝난 '+batches.length+'개 묶음은 아래 ‘오늘의 기사 요약 PDF들’에 정리돼 있어요.':'오늘 기록한 요약은 아직 없어요. (전체 '+all.length+'건)'));
   el('newsTabBtnLine').textContent=all.length?'2. 요약 ('+all.length+')':'2. 요약';
   const flowDates=all.map(m=>m.date).filter(Boolean).sort();
   el('flowInfo').textContent=all.length?'지금까지 '+all.length+'건의 요약이 쌓여 있어요'+(flowDates.length?' ('+flowDates[0]+' ~ '+flowDates[flowDates.length-1]+')':'')+'.':'아직 쌓인 요약이 없어요. 먼저 요약을 기록해 주세요.';
   const list=el('newsMemoList');list.replaceChildren();
   const pdfBar=el('todayPdfBar');if(pdfBar){
     pdfBar.replaceChildren();
-    const batches=today.filter(m=>memoArticles(m).length>0).slice().reverse();
     if(!batches.length){
       const p=node('p','아직 오늘 생성된 PDF가 없어요. 기사를 올리고 요약이 끝나면 여기에 묶음별 PDF가 하나씩 생겨요.');
       p.className='formNotice';pdfBar.append(p);
@@ -1982,7 +1999,8 @@ function renderNewsMemos(){
         row.append(name,node('small',photoCnt+'기사 '+cnt+'건'));
         const viewBtn=button('PDF 보기',()=>openPdfViewer(source,date+' ('+nth+')',[m],fname,viewBtn));viewBtn.type='button';viewBtn.className='primary';
         const saveBtn=button('저장',()=>exportDayPdf(source,date,[m],saveBtn,fname));saveBtn.type='button';
-        row.append(viewBtn,saveBtn);pdfBar.append(row);
+        const delBtn=button('PDF 삭제',()=>deleteNewsMemo(m,'이 묶음 PDF('+nth+')를 완전히 삭제할까요?'));delBtn.type='button';delBtn.className='artDel';
+        row.append(viewBtn,saveBtn,delBtn);pdfBar.append(row);
       });
       if(batches.length>1){
         const date=todayStamp();
@@ -1999,7 +2017,7 @@ function renderNewsMemos(){
       }
     }
   }
-  today.forEach(m=>list.append(newsCard(m)));
+  activeToday.forEach(m=>list.append(newsCard(m)));
   renderRecentMemos(recent);
   renderNewsFiles(past);
   renderFlowCount();
